@@ -64,7 +64,9 @@ export async function AdminLogin(req, res) {
             },
         });
         if (!existAdmin) {
-            res.send("invalid credential");
+            res.status(401).json({
+                message: "Invalid email or password!"
+            });
             return;
         }
         const isPasswordMatch = await comparePassword(Admin.password, existAdmin.password);

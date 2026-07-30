@@ -1,20 +1,20 @@
 import { cn } from "../lib/utils";
-import { Button } from "../components/UI/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/UI/card";
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "../components/UI/field";
-import { Input } from "../components/UI/Input";
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { loginFormSchema } from "@/lib/validator";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -89,7 +89,9 @@ export async function AdminLogin(req: Request, res: Response): Promise<void> {
     });
 
     if (!existAdmin) {
-      res.send("invalid credential");
+      res.status(401).json({
+        message : "Invalid email or password!"
+      });
       return;
     }
 

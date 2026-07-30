@@ -1,5 +1,5 @@
 import { cn } from "../lib/utils";
-import { Button } from "../components/UI/button";
+import { Button } from "@/components/ui/button";
 import axios from "axios";
 import {
   Card,
@@ -7,15 +7,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/UI/card";
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "../components/UI/field";
-import { Input } from "../components/UI/Input";
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { loginFormSchema } from "@/lib/validator";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,9 +24,11 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { useNavigate } from "react-router-dom";
 import { login } from "@/api/auth.apis";
 import { API_TOKEN_COOKIE_KEY } from "@/lib/constants";
+import { useAlert } from "@/components/common/alert-provider";
 
 export function Login({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -36,23 +38,31 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
   });
 
   const onSubmit = async (data: z.infer<typeof loginFormSchema>) => {
-   try {
-    const response = await login(data)
+    try {
+      const response = await login(data);
 
-    if(response.accessToken) {
-      // Save Access Token
-      localStorage.setItem(API_TOKEN_COOKIE_KEY, response.accessToken);
+      if (response.accessToken) {
+        // Save Access Token
+        localStorage.setItem(API_TOKEN_COOKIE_KEY, response.accessToken);
 
-
-      // Redirect to Dashboard
-      navigate("/");
+        showAlert({
+          variant: "default",
+          title: "Success",
+          description: "Logged in successfully.",
+        });
+        setTimeout(() => {
+          // Redirect to Dashboard
+          navigate("/");
+        }, 2000);
+      }
+    } catch (error: any) {
+      showAlert({
+        variant: "destructive",
+        title: "Login Failed!",
+        description: error.response?.data?.message || "Logged in successfully.",
+      });
+      console.error(error);
     }
-  }catch(error:any){
-    console.error(error);
-    alert(
-      error.response?.data?.message || "Login failed"
-    );
-  }
   };
 
   return (
