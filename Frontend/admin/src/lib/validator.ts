@@ -12,6 +12,12 @@ const password = z
     },
   );
 
+/**
+ * Login Form Schema
+ * 
+ * @author piyush
+ * @description Email and password validation
+ */
 export const loginFormSchema = z.object({
   email: email,
   password: password
