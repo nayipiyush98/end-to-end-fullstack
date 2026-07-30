@@ -76,7 +76,7 @@ export function ForgotPassword({ className, ...props }: React.ComponentProps<"di
                     <Field>
                       <Button type="submit">Send OTP</Button>
                       <FieldDescription className="text-center">
-                        Already have an account? <a href="javascript:void(0);" onClick={() => navigate('/login') }>Login</a>
+                        Already have an account? <a href="javascript:void(0);" onClick={() => navigate('/admin/login') }>Login</a>
                       </FieldDescription>
                     </Field>
                   </FieldGroup>

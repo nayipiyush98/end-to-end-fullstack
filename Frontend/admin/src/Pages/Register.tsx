@@ -1,6 +1,5 @@
 import { cn } from "../lib/utils";
 import { Button } from "../components/UI/button";
-import axios from "axios";
 import {
   Card,
   CardContent,
@@ -16,43 +15,46 @@ import {
   FieldLabel,
 } from "../components/UI/field";
 import { Input } from "../components/UI/Input";
-import { loginFormSchema } from "@/lib/validator";
+import { registerFormSchema } from "@/lib/validator";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useNavigate } from "react-router-dom";
-import { login } from "@/api/auth.apis";
-import { API_TOKEN_COOKIE_KEY } from "@/lib/constants";
 
-export function Login({ className, ...props }: React.ComponentProps<"div">) {
+export function Register({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof registerFormSchema>>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
+        name:"",
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof loginFormSchema>) => {
-   try {
-    const response = await login(data)
+  const onSubmit = async (data: z.infer<typeof registerFormSchema>) => {
+    try {
+    // const response = await axios.post(
+    //   "http://localhost:3000/api/auth/admin/register",
+    //   data,
+    //   {
+    //     withCredentials: true,
+    //   }
+    // );
 
-    if(response.accessToken) {
-      // Save Access Token
-      localStorage.setItem(API_TOKEN_COOKIE_KEY, response.accessToken);
+    //console.log(response);
 
+    alert("Admin registered successfully");
 
-      // Redirect to Dashboard
-      navigate("/");
-    }
-  }catch(error:any){
-    console.error(error);
-    alert(
-      error.response?.data?.message || "Login failed"
-    );
-  }
+    navigate("/admin/login");
+  }catch (error: any) {
+  console.log(error);
+  console.log(error.response);
+  console.log(error.response?.data);
+
+  alert(error.response?.data?.message || "Registration failed");
+}
   };
 
   return (
@@ -65,14 +67,32 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
           <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
               <CardHeader>
-                <CardTitle>Login to your account</CardTitle>
+                <CardTitle>Create an account</CardTitle>
                 <CardDescription>
-                  Enter your email below to login to your account
+                  Enter your information below to create your account
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <FieldGroup>
+                    <Controller
+                     name="name"
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                          <Input
+                            {...field}
+                            id={field.name}
+                            type="name"
+                            aria-invalid={fieldState.invalid}
+                          />
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
                     <Controller
                       name="email"
                       control={form.control}
@@ -111,15 +131,9 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
                         </Field>
                       )}
                     />
-                    <a
-                      href="javascript:void(0)"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      onClick={() => navigate("/forgot-password")}
-                    >
-                      Forgot your password?
-                    </a>
+                    
                     <Field>
-                      <Button type="submit">Login</Button>
+                      <Button type="submit">Create Account</Button>
                       <Button variant="outline" type="button">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -130,16 +144,10 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
                             fill="currentColor"
                           />
                         </svg>
-                        Login with Google
+                        Singup with Google
                       </Button>
                       <FieldDescription className="text-center">
-                        Don&apos;t have an account?{" "}
-                        <a
-                          href="javascript:void(0)"
-                          onClick={() => navigate("/admin/register")}
-                        >
-                          Sign up
-                        </a>
+                        Already have an account? <a href="javascript:void(0)" onClick={() => navigate('/admin/login') }>Sign In</a>
                       </FieldDescription>
                     </Field>
                   </FieldGroup>

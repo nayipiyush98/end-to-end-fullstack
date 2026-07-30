@@ -325,8 +325,6 @@ export async function UserChangePassword(req, res) {
                 message: "old password is invalid",
             });
         }
-        console.log(req.body);
-        console.log(newpassword);
         const hashedpassword = await hashPassword(newpassword);
         await prisma.user.update({
             where: {

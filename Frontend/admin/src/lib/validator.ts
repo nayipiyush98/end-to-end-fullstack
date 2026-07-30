@@ -23,7 +23,8 @@ export const loginFormSchema = z.object({
   password: password
 });
 
-export const regisyrationFormSchema = z.object({
-  email: email,
+export const registerFormSchema = z.object({
+    name:z.string().min(2, "Name is required"),
+    email: email,
   password: password
 });
