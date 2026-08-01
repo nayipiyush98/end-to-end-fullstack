@@ -1,5 +1,5 @@
 import { cn } from "../lib/utils";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -21,13 +21,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useNavigate } from "react-router-dom";
+import { register } from "@/api/auth.apis";
+import { useAlert } from "@/components/common/alert-provider";
 
 export function Register({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const form = useForm<z.infer<typeof registerFormSchema>>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
-        name:"",
+      name: "",
       email: "",
       password: "",
     },
@@ -35,26 +38,42 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
 
   const onSubmit = async (data: z.infer<typeof registerFormSchema>) => {
     try {
-    // const response = await axios.post(
-    //   "http://localhost:3000/api/auth/admin/register",
-    //   data,
-    //   {
-    //     withCredentials: true,
-    //   }
-    // );
+      const response = await register(data);
 
-    //console.log(response);
+      if (response.data) {
+        form.reset();
 
-    alert("Admin registered successfully");
+        showAlert({
+          variant: "default",
+          title: "Registration Complete!",
+          description: "Your admin account has been created.",
+        });
 
-    navigate("/admin/login");
-  }catch (error: any) {
-  console.log(error);
-  console.log(error.response);
-  console.log(error.response?.data);
+        setTimeout(() => {
+          // Redirect to Dashboard
+          navigate("/admin/login");
+        }, 2000);
+      }
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        showAlert({
+          variant: "destructive",
+          title: "Too Many Attempts",
+          description: "Please wait 15 minutes before trying again.",
+        });
+        return;
+      }
 
-  alert(error.response?.data?.message || "Registration failed");
-}
+      showAlert({
+        variant: "destructive",
+        title: "Registered Failed!",
+        description:
+          error.response?.data?.message ||
+          "Something went wrong while Registering.",
+      });
+
+      console.error(error);
+    }
   };
 
   return (
@@ -76,7 +95,7 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <FieldGroup>
                     <Controller
-                     name="name"
+                      name="name"
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
@@ -131,7 +150,7 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
                         </Field>
                       )}
                     />
-                    
+
                     <Field>
                       <Button type="submit">Create Account</Button>
                       <Button variant="outline" type="button">
@@ -147,7 +166,13 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
                         Singup with Google
                       </Button>
                       <FieldDescription className="text-center">
-                        Already have an account? <a href="javascript:void(0)" onClick={() => navigate('/admin/login') }>Sign In</a>
+                        Already have an account?{" "}
+                        <a
+                          href="javascript:void(0)"
+                          onClick={() => navigate("/admin/login")}
+                        >
+                          Sign In
+                        </a>
                       </FieldDescription>
                     </Field>
                   </FieldGroup>

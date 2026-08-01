@@ -47,19 +47,33 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
 
         showAlert({
           variant: "default",
-          title: "Success",
-          description: "Logged in successfully.",
+          title: "Welcome Back",
+          description:
+            "You have logged in safely. Redirecting you to your dashboard....",
         });
         setTimeout(() => {
           // Redirect to Dashboard
-          navigate("/");
+          navigate("/admin");
         }, 2000);
       }
     } catch (error: any) {
+      console.log(error);
+      console.log(error.response);
+      console.log(error.response?.status);
+      if (error.response?.status === 429) {
+        showAlert({
+          variant: "destructive",
+          title: "Too Many Attempts",
+          description: "Please wait 15 minutes before trying again.",
+        });
+        return;
+      }
+
       showAlert({
         variant: "destructive",
         title: "Login Failed!",
-        description: error.response?.data?.message || "Logged in successfully.",
+        description:
+          error.response?.data?.message || "Something went wrong while login.",
       });
       console.error(error);
     }
@@ -124,7 +138,7 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
                     <a
                       href="javascript:void(0)"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      onClick={() => navigate("/forgot-password")}
+                      onClick={() => navigate("/admin/forgot-password")}
                     >
                       Forgot your password?
                     </a>

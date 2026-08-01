@@ -1,21 +1,18 @@
-import { prisma } from "../config/db.js";
 import { AdminLoginValidation, AdminValidation, UserLoginValidation, UserValidation, } from "../zod/UserZod.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken, } from "../utils/jwt.js";
+import { generateAdminAccessToken, generateAdminRefreshToken, generateUserAccessToken, generateUserRefreshToken, verifyAccessToken, verifyUserRefreshToken, } from "../middleware/verifyToken.js";
 import { hashPassword, comparePassword } from "../utils/password.js";
-import { getRefreshToken } from "../utils/auth.js";
-import { maxSize } from "zod";
-export async function UserRegister(req, res) {
+import { Prisma } from "../generated/prisma/client.js";
+import { createUser, findByEmailUser, findByIdUser, updateUser } from "./models/user.model.js";
+import { findByNameRole } from "./models/role.model.js";
+import { createAdmin, findByEmailAdmin } from "./models/adminUser.model.js";
+export async function userRegister(req, res) {
     try {
-        const User = UserValidation.parse(req.body);
-        const hashedpassword = await hashPassword(User.password);
-        const newUser = await prisma.user.create({
-            data: {
-                name: User.name,
-                email: User.email,
-                password: hashedpassword,
-            },
+        const user = UserValidation.parse(req.body);
+        const hashedpassword = await hashPassword(user.password);
+        const newUser = await createUser({
+            name: user.name,
+            email: user.email,
+            password: hashedpassword
         });
         res.status(200).json(newUser);
     }
@@ -25,39 +22,46 @@ export async function UserRegister(req, res) {
         });
     }
 }
-export async function AdminRegister(req, res) {
+export async function adminRegister(req, res) {
     try {
-        const Admin = AdminValidation.parse(req.body);
-        const existAdmin = await prisma.role.findUnique({
-            where: {
-                name: Admin.name,
-            },
+        const admin = AdminValidation.parse(req.body);
+        const existAdmin = await findByNameRole(admin.name);
+        const hashedpassword = await hashPassword(admin.password);
+        const NewAdmin = await createAdmin({
+            name: admin.name,
+            email: admin.email,
+            password: hashedpassword,
+            ...(existAdmin && {
+                role: {
+                    connect: {
+                        id: existAdmin.id,
+                    },
+                },
+            }),
         });
-        const hashedpassword = await hashPassword(Admin.password);
-        const NewAdmin = await prisma.adminUser.create({
-            data: {
-                name: Admin.name,
-                email: Admin.email,
-                password: hashedpassword,
-                roleId: existAdmin ? existAdmin.id : null,
-            },
+        res.status(200).json({
+            message: "Admin registered successfully",
+            data: NewAdmin
         });
-        res.send(NewAdmin);
     }
     catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002") {
+            res.status(409).json({
+                message: "Email already exists.",
+            });
+        }
         res.status(500).json({
-            message: error instanceof Error
-                ? error?.message
-                : "Something went wrong while admin user register",
+            message: "Something went wrong.",
         });
     }
 }
-export async function AdminLogin(req, res) {
+export async function adminLogin(req, res) {
     try {
-        const Admin = AdminLoginValidation.parse(req.body);
-        const existAdmin = await prisma.adminUser.findUnique({
+        const admin = AdminLoginValidation.parse(req.body);
+        const existAdmin = await findByEmailAdmin({
             where: {
-                email: Admin.email,
+                email: admin.email
             },
             include: {
                 role: true,
@@ -69,15 +73,15 @@ export async function AdminLogin(req, res) {
             });
             return;
         }
-        const isPasswordMatch = await comparePassword(Admin.password, existAdmin.password);
+        const isPasswordMatch = await comparePassword(admin.password, existAdmin.password);
         if (!isPasswordMatch) {
             res.status(401).json({
                 message: "Invalid email or password",
             });
             return;
         }
-        const accessToken = generateAccessToken(existAdmin.id, existAdmin.email, existAdmin.role?.name);
-        const refreshToken = generateRefreshToken(existAdmin.id);
+        const accessToken = generateAdminAccessToken(existAdmin);
+        const refreshToken = generateAdminRefreshToken({ id: existAdmin.id });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -91,8 +95,8 @@ export async function AdminLogin(req, res) {
                 id: existAdmin.id,
                 name: existAdmin.name,
                 email: existAdmin.email,
-                role: existAdmin.role?.name,
-            },
+                role: existAdmin.roleId
+            }
         });
     }
     catch (error) {
@@ -103,29 +107,25 @@ export async function AdminLogin(req, res) {
         });
     }
 }
-export async function UserLogin(req, res) {
+export async function userLogin(req, res) {
     try {
-        const User = UserLoginValidation.parse(req.body);
-        const existUser = await prisma.user.findUnique({
-            where: {
-                email: User.email,
-            },
-        });
+        const user = UserLoginValidation.parse(req.body);
+        const existUser = await findByEmailUser(user.email);
         if (!existUser) {
             res.status(401).json({
                 message: "Invalid email or password",
             });
             return;
         }
-        const isPasswordMatch = await comparePassword(User.password, existUser.password);
+        const isPasswordMatch = await comparePassword(user.password, existUser.password);
         if (!isPasswordMatch) {
             res.status(401).json({
                 message: "Invalid email or password",
             });
             return;
         }
-        const accessToken = generateAccessToken(existUser.id, existUser.email);
-        const refreshToken = generateRefreshToken(existUser.id);
+        const accessToken = generateUserAccessToken(existUser);
+        const refreshToken = generateUserRefreshToken({ id: existUser.id });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -150,17 +150,19 @@ export async function UserLogin(req, res) {
         });
     }
 }
-export async function UserRefreshToken(req, res) {
+export async function userRefreshToken(req, res) {
     try {
-        const { id } = getRefreshToken(req.cookies.refreshToken);
-        const User = await prisma.user.findUnique({
-            where: { id },
+        const id = verifyUserRefreshToken(req.cookies.refreshToken);
+        const user = await findByIdUser({
+            where: {
+                id,
+            },
         });
-        if (!User) {
+        if (!user) {
             res.status(401).json({ message: "User not found" });
             return;
         }
-        const accessToken = generateAccessToken(User.id, User.email);
+        const accessToken = generateUserAccessToken(user);
         res.json({
             message: "Access token refreshed successfully",
             accessToken,
@@ -174,7 +176,7 @@ export async function UserRefreshToken(req, res) {
         });
     }
 }
-export async function UserLogOut(req, res) {
+export async function userLogOut(req, res) {
     try {
         res.clearCookie("refreshToken", {
             httpOnly: true,
@@ -191,15 +193,15 @@ export async function UserLogOut(req, res) {
         });
     }
 }
-export async function UserProfile(req, res) {
+export async function userProfile(req, res) {
     try {
-        const User = req.user;
-        if (!User) {
+        const user = req.user;
+        if (!user) {
             res.status(401).json({
                 message: "unauthorized",
             });
         }
-        const UserProfile = await prisma.user.findUnique({
+        const userProfile = await findByIdUser({
             where: {
                 id: req.user.id,
             },
@@ -207,14 +209,14 @@ export async function UserProfile(req, res) {
                 password: true,
             },
         });
-        if (!UserProfile) {
+        if (!userProfile) {
             res.status(404).json({
                 message: "User not found",
             });
         }
         res.status(200).json({
             message: "User Profile is founnd",
-            UserProfile,
+            userProfile,
         });
     }
     catch (error) {
@@ -225,19 +227,17 @@ export async function UserProfile(req, res) {
         });
     }
 }
-export async function UserForgetPassword(req, res) {
+export async function userForgetPassword(req, res) {
     try {
         const Email = req.body;
-        const User = await prisma.user.findUnique({
-            where: Email,
-        });
-        if (!User) {
+        const user = await findByEmailUser(Email);
+        if (!user) {
             res.status(404).json({
                 message: "User not found",
             });
             return;
         }
-        const token = generateAccessToken(User.id, User.email);
+        const token = generateUserAccessToken(user);
         res.status(200).send({
             message: "OTP is 394585",
             Token: token,
@@ -251,7 +251,7 @@ export async function UserForgetPassword(req, res) {
         });
     }
 }
-export async function UserResetPassword(req, res) {
+export async function userResetPassword(req, res) {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -268,12 +268,12 @@ export async function UserResetPassword(req, res) {
             return;
         }
         const decoded = verifyAccessToken(token);
-        const User = await prisma.user.findUnique({
+        const user = await findByIdUser({
             where: {
                 id: decoded.id,
             },
         });
-        if (!User) {
+        if (!user) {
             res.status(404).json({
                 message: "User not found",
             });
@@ -281,13 +281,8 @@ export async function UserResetPassword(req, res) {
         }
         const { password } = req.body;
         const hashedpassword = await hashPassword(password);
-        await prisma.user.update({
-            where: {
-                id: decoded.id,
-            },
-            data: {
-                password: hashedpassword,
-            },
+        await updateUser(decoded.id, {
+            password: hashedpassword,
         });
         res.status(200).json({
             message: "Password reset successfully",
@@ -301,7 +296,7 @@ export async function UserResetPassword(req, res) {
         });
     }
 }
-export async function UserChangePassword(req, res) {
+export async function userChangePassword(req, res) {
     try {
         if (!req.user) {
             res.status(401).json({
@@ -309,32 +304,28 @@ export async function UserChangePassword(req, res) {
             });
             return;
         }
+        const user = req.user;
         const { oldpassword, newpassword } = req.body;
-        const user = await prisma.user.findUnique({
+        const existUser = await findByIdUser({
             where: {
-                id: req.user?.id,
-            },
+                id: user.id
+            }
         });
-        if (!user) {
+        if (!existUser) {
             res.status(401).json({
                 message: "User not found",
             });
             return;
         }
-        const IsMatch = await comparePassword(oldpassword, user.password);
+        const IsMatch = await comparePassword(oldpassword, existUser.password);
         if (!IsMatch) {
             res.status(401).json({
                 message: "old password is invalid",
             });
         }
         const hashedpassword = await hashPassword(newpassword);
-        await prisma.user.update({
-            where: {
-                id: user.id,
-            },
-            data: {
-                password: hashedpassword,
-            },
+        await updateUser(user.id, {
+            password: hashedpassword,
         });
         res.status(200).json({
             message: "Successfully password changed",

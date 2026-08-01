@@ -1,37 +1,53 @@
 import Express from "express";
 import {
-  UserRegister,
-  AdminRegister,
-  AdminLogin,
-  UserLogin,
-  UserRefreshToken,
-  UserLogOut,
-  UserProfile,
-  UserForgetPassword,
-  UserResetPassword,
-  UserChangePassword
+  userRegister,
+  adminRegister,
+  adminLogin,
+  userLogin,
+  userRefreshToken,
+  userLogOut,
+  userProfile,
+  userForgetPassword,
+  userResetPassword,
+  userChangePassword,
 } from "../controller/auth.controller.js";
-import { auth } from "../utils/UserAuth.js";
+import { rateLimiter } from "../middleware/rateLimiter.js";
+import { verifyAccessTokenAndGetUser } from "../middleware/verifyToken.js";
 
 const authRoutes = Express.Router();
 
 /**
  * Admin Routes
  */
-authRoutes.post("/admin/register", AdminRegister);
-authRoutes.post("/admin/login", AdminLogin);
+authRoutes.post("/admin/register", rateLimiter, adminRegister);
+authRoutes.post("/admin/login", rateLimiter, adminLogin);
 
 /**
  * User Routes
  */
-authRoutes.get("/users", UserRegister);
-authRoutes.post("/register", UserRegister);
-authRoutes.post("/login", UserLogin);
-authRoutes.post("/refresh-token", UserRefreshToken);
-authRoutes.post("/logout", UserLogOut);
-authRoutes.get("/me", auth, UserProfile);
-authRoutes.post("/forget-password", auth,UserForgetPassword);
-authRoutes.post("/reset-password",auth,UserResetPassword)
-authRoutes.patch("/change-password",auth,UserChangePassword)
+authRoutes.get("/users", rateLimiter, userRegister);
+authRoutes.post("/register", rateLimiter, userRegister);
+authRoutes.post("/login", rateLimiter, userLogin);
+authRoutes.post("/refresh-token", userRefreshToken);
+authRoutes.post("/logout", userLogOut);
+authRoutes.get("/me", verifyAccessTokenAndGetUser, userProfile);
+authRoutes.post(
+  "/forget-password",
+  rateLimiter,
+  verifyAccessTokenAndGetUser,
+  userForgetPassword,
+);
+authRoutes.post(
+  "/reset-password",
+  rateLimiter,
+  verifyAccessTokenAndGetUser,
+  userResetPassword,
+);
+authRoutes.patch(
+  "/change-password",
+  rateLimiter,
+  verifyAccessTokenAndGetUser,
+  userChangePassword,
+);
 
 export default authRoutes;

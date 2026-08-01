@@ -1,35 +1,39 @@
 import type { Request, Response } from "express";
-import { prisma } from "../config/db.js";
 import {
   AdminLoginValidation,
   AdminValidation,
   UserLoginValidation,
   UserValidation,
 } from "../zod/UserZod.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import {
-  generateAccessToken,
-  generateRefreshToken,
+  generateAdminAccessToken,
+  generateAdminRefreshToken,
+  generateUserAccessToken,
+  generateUserRefreshToken,
   verifyAccessToken,
-  verifyRefreshToken,
-} from "../utils/jwt.js";
+  verifyUserRefreshToken,
+} from "../middleware/verifyToken.js";
 import { hashPassword, comparePassword } from "../utils/password.js";
-import { getRefreshToken } from "../utils/auth.js";
-import { maxSize } from "zod";
+import { Prisma } from "../generated/prisma/client.js";
+import {
+  createUser,
+  findByEmailUser,
+  findByIdUser,
+  updateUser,
+} from "./models/user.model.js";
+import { findByNameRole } from "./models/role.model.js";
+import { createAdmin, findByEmailAdmin } from "./models/adminUser.model.js";
 
-export async function UserRegister(req: Request, res: Response): Promise<void> {
+export async function userRegister(req: Request, res: Response): Promise<void> {
   try {
-    const User = UserValidation.parse(req.body);
+    const user = UserValidation.parse(req.body);
 
-    const hashedpassword = await hashPassword(User.password);
+    const hashedpassword = await hashPassword(user.password);
 
-    const newUser = await prisma.user.create({
-      data: {
-        name: User.name,
-        email: User.email,
-        password: hashedpassword,
-      },
+    const newUser = await createUser({
+      name: user.name,
+      email: user.email,
+      password: hashedpassword,
     });
 
     res.status(200).json(newUser);
@@ -40,48 +44,57 @@ export async function UserRegister(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function AdminRegister(
+export async function adminRegister(
   req: Request,
   res: Response,
 ): Promise<void> {
   try {
-    const Admin = AdminValidation.parse(req.body);
+    const admin = AdminValidation.parse(req.body);
 
-    const existAdmin = await prisma.role.findUnique({
-      where: {
-        name: Admin.name,
-      },
+    const existAdmin = await findByNameRole(admin.name);
+
+    const hashedpassword = await hashPassword(admin.password);
+
+    const NewAdmin = await createAdmin({
+      name: admin.name,
+      email: admin.email,
+      password: hashedpassword,
+      ...(existAdmin && {
+        role: {
+          connect: {
+            id: existAdmin.id,
+          },
+        },
+      }),
     });
 
-    const hashedpassword = await hashPassword(Admin.password);
-
-    const NewAdmin = await prisma.adminUser.create({
-      data: {
-        name: Admin.name,
-        email: Admin.email,
-        password: hashedpassword,
-        roleId: existAdmin ? existAdmin.id : null,
-      },
+    res.status(200).json({
+      message: "Admin registered successfully",
+      data: NewAdmin,
     });
+  } catch (error: any) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      res.status(409).json({
+        message: "Email already exists.",
+      });
+    }
 
-    res.send(NewAdmin);
-  } catch (error: unknown) {
     res.status(500).json({
-      message:
-        error instanceof Error
-          ? error?.message
-          : "Something went wrong while admin user register",
+      message: "Something went wrong.",
     });
   }
 }
 
-export async function AdminLogin(req: Request, res: Response): Promise<void> {
+export async function adminLogin(req: Request, res: Response): Promise<void> {
   try {
-    const Admin = AdminLoginValidation.parse(req.body);
+    const admin = AdminLoginValidation.parse(req.body);
 
-    const existAdmin = await prisma.adminUser.findUnique({
+    const existAdmin = await findByEmailAdmin({
       where: {
-        email: Admin.email,
+        email: admin.email,
       },
       include: {
         role: true,
@@ -90,13 +103,13 @@ export async function AdminLogin(req: Request, res: Response): Promise<void> {
 
     if (!existAdmin) {
       res.status(401).json({
-        message : "Invalid email or password!"
+        message: "Invalid email or password!",
       });
       return;
     }
 
     const isPasswordMatch = await comparePassword(
-      Admin.password,
+      admin.password,
       existAdmin.password,
     );
 
@@ -107,13 +120,9 @@ export async function AdminLogin(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const accessToken = generateAccessToken(
-      existAdmin.id,
-      existAdmin.email,
-      existAdmin.role?.name,
-    );
+    const accessToken = generateAdminAccessToken(existAdmin);
 
-    const refreshToken = generateRefreshToken(existAdmin.id);
+    const refreshToken = generateAdminRefreshToken({ id: existAdmin.id });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -129,7 +138,7 @@ export async function AdminLogin(req: Request, res: Response): Promise<void> {
         id: existAdmin.id,
         name: existAdmin.name,
         email: existAdmin.email,
-        role: existAdmin.role?.name,
+        role: existAdmin.roleId,
       },
     });
   } catch (error: unknown) {
@@ -142,15 +151,11 @@ export async function AdminLogin(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function UserLogin(req: Request, res: Response): Promise<void> {
+export async function userLogin(req: Request, res: Response): Promise<void> {
   try {
-    const User = UserLoginValidation.parse(req.body);
+    const user = UserLoginValidation.parse(req.body);
 
-    const existUser = await prisma.user.findUnique({
-      where: {
-        email: User.email,
-      },
-    });
+    const existUser = await findByEmailUser(user.email);
 
     if (!existUser) {
       res.status(401).json({
@@ -160,7 +165,7 @@ export async function UserLogin(req: Request, res: Response): Promise<void> {
     }
 
     const isPasswordMatch = await comparePassword(
-      User.password,
+      user.password,
       existUser.password,
     );
 
@@ -171,9 +176,9 @@ export async function UserLogin(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const accessToken = generateAccessToken(existUser.id, existUser.email);
+    const accessToken = generateUserAccessToken(existUser);
 
-    const refreshToken = generateRefreshToken(existUser.id);
+    const refreshToken = generateUserRefreshToken({ id: existUser.id });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -201,23 +206,25 @@ export async function UserLogin(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function UserRefreshToken(
+export async function userRefreshToken(
   req: Request,
   res: Response,
 ): Promise<void> {
   try {
-    const { id } = getRefreshToken(req.cookies.refreshToken);
+    const id = verifyUserRefreshToken(req.cookies.refreshToken);
 
-    const User = await prisma.user.findUnique({
-      where: { id },
+    const user = await findByIdUser({
+      where: {
+        id,
+      },
     });
 
-    if (!User) {
+    if (!user) {
       res.status(401).json({ message: "User not found" });
       return;
     }
 
-    const accessToken = generateAccessToken(User.id, User.email);
+    const accessToken = generateUserAccessToken(user);
 
     res.json({
       message: "Access token refreshed successfully",
@@ -233,7 +240,7 @@ export async function UserRefreshToken(
   }
 }
 
-export async function UserLogOut(req: Request, res: Response): Promise<void> {
+export async function userLogOut(req: Request, res: Response): Promise<void> {
   try {
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -251,17 +258,17 @@ export async function UserLogOut(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function UserProfile(req: Request, res: Response): Promise<void> {
+export async function userProfile(req: Request, res: Response): Promise<void> {
   try {
-    const User = req.user;
+    const user = req.user;
 
-    if (!User) {
+    if (!user) {
       res.status(401).json({
         message: "unauthorized",
       });
     }
 
-    const UserProfile = await prisma.user.findUnique({
+    const userProfile = await findByIdUser({
       where: {
         id: req.user!.id,
       },
@@ -270,7 +277,7 @@ export async function UserProfile(req: Request, res: Response): Promise<void> {
       },
     });
 
-    if (!UserProfile) {
+    if (!userProfile) {
       res.status(404).json({
         message: "User not found",
       });
@@ -278,7 +285,7 @@ export async function UserProfile(req: Request, res: Response): Promise<void> {
 
     res.status(200).json({
       message: "User Profile is founnd",
-      UserProfile,
+      userProfile,
     });
   } catch (error) {
     res.status(500).json({
@@ -290,25 +297,23 @@ export async function UserProfile(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function UserForgetPassword(
+export async function userForgetPassword(
   req: Request,
   res: Response,
 ): Promise<void> {
   try {
     const Email = req.body;
 
-    const User = await prisma.user.findUnique({
-      where: Email,
-    });
+    const user = await findByEmailUser(Email);
 
-    if (!User) {
+    if (!user) {
       res.status(404).json({
         message: "User not found",
       });
       return;
     }
 
-    const token = generateAccessToken(User.id, User.email);
+    const token = generateUserAccessToken(user);
 
     res.status(200).send({
       message: "OTP is 394585",
@@ -324,7 +329,7 @@ export async function UserForgetPassword(
   }
 }
 
-export async function UserResetPassword(
+export async function userResetPassword(
   req: Request,
   res: Response,
 ): Promise<void> {
@@ -352,13 +357,13 @@ export async function UserResetPassword(
       email: string;
     };
 
-    const User = await prisma.user.findUnique({
+    const user = await findByIdUser({
       where: {
         id: decoded.id,
       },
     });
 
-    if (!User) {
+    if (!user) {
       res.status(404).json({
         message: "User not found",
       });
@@ -369,13 +374,8 @@ export async function UserResetPassword(
 
     const hashedpassword = await hashPassword(password);
 
-    await prisma.user.update({
-      where: {
-        id: decoded.id,
-      },
-      data: {
-        password: hashedpassword,
-      },
+    await updateUser(decoded.id, {
+      password: hashedpassword,
     });
 
     res.status(200).json({
@@ -391,7 +391,7 @@ export async function UserResetPassword(
   }
 }
 
-export async function UserChangePassword(
+export async function userChangePassword(
   req: Request,
   res: Response,
 ): Promise<void> {
@@ -403,39 +403,35 @@ export async function UserChangePassword(
       return;
     }
 
+    const user = req.user;
+
     const { oldpassword, newpassword } = req.body;
 
-    const user = await prisma.user.findUnique({
+    const existUser = await findByIdUser({
       where: {
-        id: req.user?.id,
+        id: user.id,
       },
     });
 
-    if (!user) {
+    if (!existUser) {
       res.status(401).json({
         message: "User not found",
       });
       return;
     }
 
-    const IsMatch = await comparePassword(oldpassword, user.password);
+    const IsMatch = await comparePassword(oldpassword, existUser.password);
 
     if (!IsMatch) {
       res.status(401).json({
         message: "old password is invalid",
       });
     }
-    
 
     const hashedpassword = await hashPassword(newpassword);
 
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        password: hashedpassword,
-      },
+    await updateUser(user.id, {
+      password: hashedpassword,
     });
 
     res.status(200).json({

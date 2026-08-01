@@ -8,6 +8,7 @@ export declare const AdminValidation: z.ZodObject<{
     name: z.ZodString;
     email: z.ZodEmail;
     password: z.ZodString;
+    roleId: z.ZodNullable<z.ZodInt>;
 }, z.core.$strip>;
 export declare const AdminLoginValidation: z.ZodObject<{
     email: z.ZodEmail;
