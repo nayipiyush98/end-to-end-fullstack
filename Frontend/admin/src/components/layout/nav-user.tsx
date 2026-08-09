@@ -47,6 +47,14 @@ export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
   const [open, setOpen] = useDialogState()
 
+  const adminNameWords = user?.name.trim().split(" ") ?? "";
+  const userInitials =
+    adminNameWords?.length > 1
+      ? adminNameWords?.[0]?.[0].toUpperCase() +
+        adminNameWords?.[1]?.[0].toUpperCase()
+      : adminNameWords?.[0]?.[0].toUpperCase() +
+          adminNameWords?.[0]?.[1].toUpperCase() || "SN";
+
   return (
     <>
       <SidebarMenu>
@@ -74,12 +82,7 @@ export function NavUser({ user }: NavUserProps) {
                 />
 
                 <AvatarFallback className="rounded-lg">
-                  {user.name
-                    .split(" ")
-                    .map((name) => name[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()}
+                  {userInitials}
                 </AvatarFallback>
               </Avatar>
 
@@ -151,7 +154,7 @@ export function NavUser({ user }: NavUserProps) {
 
                 <DropdownMenuItem
                   render={
-                    <Link to="/settings/account">
+                    <Link to="admin/settings/account">
                       <BadgeCheck />
                       <span>Account</span>
                     </Link>
@@ -160,7 +163,7 @@ export function NavUser({ user }: NavUserProps) {
 
                 <DropdownMenuItem
                   render={
-                    <Link to="/settings/notifications">
+                    <Link to="/admin/settings/notifications">
                       <Bell />
                       <span>Notifications</span>
                     </Link>

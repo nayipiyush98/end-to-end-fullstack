@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/store/auth.store';
 import {
   LayoutDashboard,
   Monitor,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react'
 
 const URL_PREFIX = '/admin';
+
 
 export const sidebarData = {
   user: {
@@ -69,12 +71,12 @@ export const sidebarData = {
         },
         {
           title: 'Users',
-          url: '/users',
+          url: `${URL_PREFIX}/users`,
           icon: Users,
         },
         {
           title: 'Security',
-          url: '/roles',
+          url: `${URL_PREFIX}/security`,
           icon: FingerprintPattern,
         }
       ],
@@ -88,27 +90,27 @@ export const sidebarData = {
           items: [
             {
               title: 'Profile',
-              url: '/settings',
+              url: `${URL_PREFIX}/settings`,
               icon: UserCog,
             },
             {
               title: 'Account',
-              url: '/settings/account',
+              url: `${URL_PREFIX}/settings/account`,
               icon: Wrench,
             },
             {
               title: 'Appearance',
-              url: '/settings/appearance',
+              url: `${URL_PREFIX}/settings/appearance`,
               icon: Palette,
             },
             {
               title: 'Notifications',
-              url: '/settings/notifications',
+              url: `${URL_PREFIX}/settings/notifications`,
               icon: Bell,
             },
             {
               title: 'Display',
-              url: '/settings/display',
+              url: `${URL_PREFIX}/settings/display`,
               icon: Monitor,
             },
           ],

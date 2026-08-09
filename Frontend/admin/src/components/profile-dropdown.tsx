@@ -13,9 +13,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SignOutDialog } from "@/components/sign-out-dialog";
+import { useAuthStore } from "@/store/auth.store";
 
 export function ProfileDropdown() {
   const [open, setOpen] = useDialogState();
+  const admin = useAuthStore((state) => state.admin);
+  const adminNameWords = admin?.name.trim().split(" ") ?? "";
+  const userInitials =
+    adminNameWords?.length > 1
+      ? adminNameWords?.[0]?.[0].toUpperCase() +
+        adminNameWords?.[1]?.[0].toUpperCase()
+      : adminNameWords?.[0]?.[0].toUpperCase() +
+          adminNameWords?.[0]?.[1].toUpperCase() || "SN";
 
   return (
     <>
@@ -24,8 +33,11 @@ export function ProfileDropdown() {
           render={
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                <AvatarFallback>SN</AvatarFallback>
+                <AvatarImage
+                  src="/avatars/01.png"
+                  alt={admin?.name ?? "User"}
+                />
+                <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
             </Button>
           }
@@ -34,9 +46,11 @@ export function ProfileDropdown() {
           <DropdownMenuGroup>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1.5">
-                <p className="text-sm leading-none font-medium">satnaing</p>
+                <p className="text-sm leading-none font-medium">
+                  {admin?.name}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  satnaingdev@gmail.com
+                  {admin?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
