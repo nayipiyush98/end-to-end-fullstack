@@ -1,6 +1,5 @@
 import { cn } from "../lib/utils";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
 import {
   Card,
   CardContent,
@@ -23,11 +22,12 @@ import { z } from "zod";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useNavigate } from "react-router-dom";
 import { login } from "@/api/auth.apis";
-import { API_TOKEN_COOKIE_KEY } from "@/lib/constants";
+import { useAuth } from "@/hooks/useAuth";
 import { useAlert } from "@/components/common/alert-provider";
 
 export function Login({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const { showAlert } = useAlert();
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -41,9 +41,11 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
     try {
       const response = await login(data);
 
-      if (response.accessToken) {
-        // Save Access Token
-        localStorage.setItem(API_TOKEN_COOKIE_KEY, response.accessToken);
+      if (response.accessToken && response.admin) {
+
+
+           await login(data);
+
 
         showAlert({
           variant: "default",

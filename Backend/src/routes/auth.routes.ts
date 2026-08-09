@@ -10,9 +10,12 @@ import {
   userForgetPassword,
   userResetPassword,
   userChangePassword,
+  adminRefreshToken,
+  adminMe,
 } from "../controller/auth.controller.js";
 import { rateLimiter } from "../middleware/rateLimiter.js";
 import { verifyAccessTokenAndGetUser } from "../middleware/verifyToken.js";
+import { adminAuth } from "../middleware/adminAuth.js";
 
 const authRoutes = Express.Router();
 
@@ -21,6 +24,8 @@ const authRoutes = Express.Router();
  */
 authRoutes.post("/admin/register", rateLimiter, adminRegister);
 authRoutes.post("/admin/login", rateLimiter, adminLogin);
+authRoutes.get("/admin/me", adminAuth, adminMe);
+authRoutes.post("/admin/refresh", adminRefreshToken);
 
 /**
  * User Routes

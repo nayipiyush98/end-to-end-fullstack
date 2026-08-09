@@ -1,5 +1,5 @@
-import { Prisma } from "../../generated/prisma/client.js";
-import { prisma } from "../../config/db.js"; 
+import { prisma } from "../config/db.js"
+import { Prisma } from "../generated/prisma/client.js";
 
 
 export async function createUser(data:Prisma.UserCreateInput) {

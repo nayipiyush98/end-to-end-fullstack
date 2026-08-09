@@ -1,5 +1,5 @@
-import { prisma } from "../../config/db.js"
-import { Prisma } from "../../generated/prisma/client.js"
+import { prisma } from "../config/db.js"
+import { Prisma } from "../generated/prisma/client.js";
 
 export async function createRole(data:Prisma.RoleCreateInput){
     return await prisma.role.create({
@@ -14,17 +14,14 @@ export async function updateRole(id:number,data:Prisma.RoleUpdateInput){
     })
 }
 
-
-export async function findByIdRole(id:number){
-    return await prisma.role.findUnique({
-        where:{id}
-    })
+export async function findByIdRole<T extends Prisma.RoleFindUniqueArgs>(
+  args: Prisma.SelectSubset<T, Prisma.RoleFindUniqueArgs>
+) {
+  return prisma.role.findUnique(args);
 }
 
-export async function findByNameRole(name:string){
-    return await prisma.role.findUnique({
-        where:{name}
-    })
+export async function findByNameRole(args:Prisma.RoleFindUniqueArgs){
+    return await prisma.role.findUnique(args)
 }
 
 export async function deleteRole(id:number) {

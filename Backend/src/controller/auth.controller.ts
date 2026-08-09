@@ -11,6 +11,7 @@ import {
   generateUserAccessToken,
   generateUserRefreshToken,
   verifyAccessToken,
+  verifyAdminRefreshToken,
   verifyUserRefreshToken,
 } from "../middleware/verifyToken.js";
 import { hashPassword, comparePassword } from "../utils/password.js";
@@ -20,9 +21,13 @@ import {
   findByEmailUser,
   findByIdUser,
   updateUser,
-} from "./models/user.model.js";
-import { findByNameRole } from "./models/role.model.js";
-import { createAdmin, findByEmailAdmin } from "./models/adminUser.model.js";
+} from "../models/user.model.js";
+import { findByNameRole } from "../models/role.model.js";
+import {
+  createAdmin,
+  findByEmailAdmin,
+  findAdminById,
+} from "../models/adminUser.model.js";
 
 export async function userRegister(req: Request, res: Response): Promise<void> {
   try {
@@ -51,7 +56,11 @@ export async function adminRegister(
   try {
     const admin = AdminValidation.parse(req.body);
 
-    const existAdmin = await findByNameRole(admin.name);
+    const existAdmin = await findByNameRole({
+      where: {
+        name: admin.name,
+      },
+    });
 
     const hashedpassword = await hashPassword(admin.password);
 
@@ -80,8 +89,9 @@ export async function adminRegister(
       res.status(409).json({
         message: "Email already exists.",
       });
+      return;
     }
-
+    console.error(error);
     res.status(500).json({
       message: "Something went wrong.",
     });
@@ -97,7 +107,11 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
         email: admin.email,
       },
       include: {
-        role: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
@@ -130,7 +144,6 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
     res.status(200).json({
       message: "Admin login successful",
       accessToken,
@@ -138,7 +151,6 @@ export async function adminLogin(req: Request, res: Response): Promise<void> {
         id: existAdmin.id,
         name: existAdmin.name,
         email: existAdmin.email,
-        role: existAdmin.roleId,
       },
     });
   } catch (error: unknown) {
@@ -443,6 +455,111 @@ export async function userChangePassword(
         error instanceof Error
           ? error.message
           : "Invalid or expired reset token",
+    });
+  }
+}
+
+export async function adminMe(req: Request, res: Response): Promise<void> {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    const admin = await findAdminById({
+      where: {
+        id: req.user.id,
+      },
+      include: {
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!admin) {
+      res.status(404).json({
+        message: "Admin not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      id: admin.id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role?.name ?? null,
+      permissions:
+        admin.role?.rolePermissions.map((rp) => rp.permission.name) ?? [],
+    });
+  } catch (error) {
+    res.status(500).json({
+      message:
+        error instanceof Error
+          ? error?.message
+          : "Internal server error while fetching admin profile",
+    });
+  }
+}
+
+export async function adminRefreshToken(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+     console.log("=== ADMIN REFRESH ===");
+    console.log("Cookies:", req.cookies);
+
+    const refreshToken = req.cookies.refreshToken;
+
+    console.log("Refresh token:", refreshToken);
+
+    if (!refreshToken) {
+      res.status(401).json({
+        message: "Refresh token required",
+      });
+      return;
+    }
+
+      const adminId = verifyAdminRefreshToken(refreshToken);
+
+        console.log("Admin ID:", adminId);
+
+      const admin = await findAdminById({
+        where: {
+          id: adminId,
+        },
+      });
+      
+      if (!admin) {
+        res.status(404).json({
+          message: "Admin not found",
+        });
+        return;
+      }
+      
+      const accessToken = generateAdminAccessToken(admin);
+
+        console.log("✅ New access token generated");
+      
+      res.status(200).json({
+        message: "Access token refreshed successfully",
+        accessToken,
+      });
+  } catch (error) {
+    res.status(401).json({
+      message:
+        error instanceof Error
+          ? error?.message
+          : "Something went wrong while refreshing admin access token",
     });
   }
 }

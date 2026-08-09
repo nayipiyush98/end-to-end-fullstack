@@ -6,7 +6,7 @@ declare global {
             user?: {
                 id: number;
                 email: string;
-                role?: string;
+                roleId?: number | null;
             };
         }
     }
@@ -32,6 +32,7 @@ export declare function generateUserAccessToken(payload: UserAccessTokenPayload)
 export declare function generateUserRefreshToken(payload: UserRefreshTokenPayload): string;
 export declare const verifyAccessToken: (token: string) => string | jwt.JwtPayload;
 export declare function verifyUserRefreshToken(token: string): number;
+export declare function verifyAdminRefreshToken(token: string): number;
 export declare function verifyAccessTokenAndGetUser(req: Request, res: Response, next: NextFunction): void;
 export {};
 //# sourceMappingURL=verifyToken.d.ts.map

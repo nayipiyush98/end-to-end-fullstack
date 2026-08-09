@@ -30,6 +30,7 @@ export declare const ModelName: {
     readonly AdminUser: 'AdminUser';
     readonly Role: 'Role';
     readonly Permission: 'Permission';
+    readonly RolePermission: 'RolePermission';
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -67,6 +68,11 @@ export declare const PermissionScalarFieldEnum: {
     readonly description: 'description';
 };
 export type PermissionScalarFieldEnum = (typeof PermissionScalarFieldEnum)[keyof typeof PermissionScalarFieldEnum];
+export declare const RolePermissionScalarFieldEnum: {
+    readonly roleId: 'roleId';
+    readonly permissionId: 'permissionId';
+};
+export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: 'asc';
     readonly desc: 'desc';

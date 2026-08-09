@@ -9,4 +9,6 @@ export declare function userProfile(req: Request, res: Response): Promise<void>;
 export declare function userForgetPassword(req: Request, res: Response): Promise<void>;
 export declare function userResetPassword(req: Request, res: Response): Promise<void>;
 export declare function userChangePassword(req: Request, res: Response): Promise<void>;
+export declare function adminMe(req: Request, res: Response): Promise<void>;
+export declare function adminRefreshToken(req: Request, res: Response): Promise<void>;
 //# sourceMappingURL=auth.controller.d.ts.map

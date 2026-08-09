@@ -26,6 +26,10 @@ export function verifyUserRefreshToken(token) {
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     return decoded.id;
 }
+export function verifyAdminRefreshToken(token) {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    return decoded.id;
+}
 export function verifyAccessTokenAndGetUser(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {

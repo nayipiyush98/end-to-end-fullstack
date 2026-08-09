@@ -1,10 +1,10 @@
 import { AdminLoginValidation, AdminValidation, UserLoginValidation, UserValidation, } from "../zod/UserZod.js";
-import { generateAdminAccessToken, generateAdminRefreshToken, generateUserAccessToken, generateUserRefreshToken, verifyAccessToken, verifyUserRefreshToken, } from "../middleware/verifyToken.js";
+import { generateAdminAccessToken, generateAdminRefreshToken, generateUserAccessToken, generateUserRefreshToken, verifyAccessToken, verifyAdminRefreshToken, verifyUserRefreshToken, } from "../middleware/verifyToken.js";
 import { hashPassword, comparePassword } from "../utils/password.js";
 import { Prisma } from "../generated/prisma/client.js";
-import { createUser, findByEmailUser, findByIdUser, updateUser } from "./models/user.model.js";
-import { findByNameRole } from "./models/role.model.js";
-import { createAdmin, findByEmailAdmin } from "./models/adminUser.model.js";
+import { createUser, findByEmailUser, findByIdUser, updateUser, } from "../models/user.model.js";
+import { findByNameRole } from "../models/role.model.js";
+import { createAdmin, findByEmailAdmin, findAdminById, } from "../models/adminUser.model.js";
 export async function userRegister(req, res) {
     try {
         const user = UserValidation.parse(req.body);
@@ -12,7 +12,7 @@ export async function userRegister(req, res) {
         const newUser = await createUser({
             name: user.name,
             email: user.email,
-            password: hashedpassword
+            password: hashedpassword,
         });
         res.status(200).json(newUser);
     }
@@ -25,7 +25,11 @@ export async function userRegister(req, res) {
 export async function adminRegister(req, res) {
     try {
         const admin = AdminValidation.parse(req.body);
-        const existAdmin = await findByNameRole(admin.name);
+        const existAdmin = await findByNameRole({
+            where: {
+                name: admin.name,
+            },
+        });
         const hashedpassword = await hashPassword(admin.password);
         const NewAdmin = await createAdmin({
             name: admin.name,
@@ -41,7 +45,7 @@ export async function adminRegister(req, res) {
         });
         res.status(200).json({
             message: "Admin registered successfully",
-            data: NewAdmin
+            data: NewAdmin,
         });
     }
     catch (error) {
@@ -50,7 +54,9 @@ export async function adminRegister(req, res) {
             res.status(409).json({
                 message: "Email already exists.",
             });
+            return;
         }
+        console.error(error);
         res.status(500).json({
             message: "Something went wrong.",
         });
@@ -61,15 +67,19 @@ export async function adminLogin(req, res) {
         const admin = AdminLoginValidation.parse(req.body);
         const existAdmin = await findByEmailAdmin({
             where: {
-                email: admin.email
+                email: admin.email,
             },
             include: {
-                role: true,
+                role: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
         });
         if (!existAdmin) {
             res.status(401).json({
-                message: "Invalid email or password!"
+                message: "Invalid email or password!",
             });
             return;
         }
@@ -95,8 +105,7 @@ export async function adminLogin(req, res) {
                 id: existAdmin.id,
                 name: existAdmin.name,
                 email: existAdmin.email,
-                role: existAdmin.roleId
-            }
+            },
         });
     }
     catch (error) {
@@ -308,8 +317,8 @@ export async function userChangePassword(req, res) {
         const { oldpassword, newpassword } = req.body;
         const existUser = await findByIdUser({
             where: {
-                id: user.id
-            }
+                id: user.id,
+            },
         });
         if (!existUser) {
             res.status(401).json({
@@ -336,6 +345,92 @@ export async function userChangePassword(req, res) {
             message: error instanceof Error
                 ? error.message
                 : "Invalid or expired reset token",
+        });
+    }
+}
+export async function adminMe(req, res) {
+    try {
+        if (!req.user) {
+            res.status(401).json({
+                message: "Unauthorized",
+            });
+            return;
+        }
+        const admin = await findAdminById({
+            where: {
+                id: req.user.id,
+            },
+            include: {
+                role: {
+                    include: {
+                        rolePermissions: {
+                            include: {
+                                permission: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!admin) {
+            res.status(404).json({
+                message: "Admin not found",
+            });
+            return;
+        }
+        res.status(200).json({
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            role: admin.role?.name ?? null,
+            permissions: admin.role?.rolePermissions.map((rp) => rp.permission.name) ?? [],
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            message: error instanceof Error
+                ? error?.message
+                : "Internal server error while fetching admin profile",
+        });
+    }
+}
+export async function adminRefreshToken(req, res) {
+    try {
+        console.log("=== ADMIN REFRESH ===");
+        console.log("Cookies:", req.cookies);
+        const refreshToken = req.cookies.refreshToken;
+        console.log("Refresh token:", refreshToken);
+        if (!refreshToken) {
+            res.status(401).json({
+                message: "Refresh token required",
+            });
+            return;
+        }
+        const adminId = verifyAdminRefreshToken(refreshToken);
+        console.log("Admin ID:", adminId);
+        const admin = await findAdminById({
+            where: {
+                id: adminId,
+            },
+        });
+        if (!admin) {
+            res.status(404).json({
+                message: "Admin not found",
+            });
+            return;
+        }
+        const accessToken = generateAdminAccessToken(admin);
+        console.log("✅ New access token generated");
+        res.status(200).json({
+            message: "Access token refreshed successfully",
+            accessToken,
+        });
+    }
+    catch (error) {
+        res.status(401).json({
+            message: error instanceof Error
+                ? error?.message
+                : "Something went wrong while refreshing admin access token",
         });
     }
 }

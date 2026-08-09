@@ -8,7 +8,7 @@ declare global {
       user?: {
         id: number;
         email: string;
-        role?: string;
+        roleId?: number | null;
       };
     }
   }
@@ -77,6 +77,15 @@ interface RefreshTokenPayload {
 }
 
 export function verifyUserRefreshToken(token: string): number {
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_REFRESH_SECRET!
+  ) as RefreshTokenPayload;
+
+  return decoded.id;
+}
+
+export function verifyAdminRefreshToken(token: string): number {
   const decoded = jwt.verify(
     token,
     process.env.JWT_REFRESH_SECRET!

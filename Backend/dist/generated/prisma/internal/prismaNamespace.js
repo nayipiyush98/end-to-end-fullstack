@@ -71,7 +71,8 @@ export const ModelName = {
     User: 'User',
     AdminUser: 'AdminUser',
     Role: 'Role',
-    Permission: 'Permission'
+    Permission: 'Permission',
+    RolePermission: 'RolePermission'
 };
 /**
  * Enums
@@ -105,6 +106,10 @@ export const PermissionScalarFieldEnum = {
     id: 'id',
     name: 'name',
     description: 'description'
+};
+export const RolePermissionScalarFieldEnum = {
+    roleId: 'roleId',
+    permissionId: 'permissionId'
 };
 export const SortOrder = {
     asc: 'asc',

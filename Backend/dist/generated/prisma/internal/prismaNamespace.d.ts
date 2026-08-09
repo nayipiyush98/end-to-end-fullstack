@@ -248,6 +248,7 @@ export declare const ModelName: {
     readonly AdminUser: 'AdminUser';
     readonly Role: 'Role';
     readonly Permission: 'Permission';
+    readonly RolePermission: 'RolePermission';
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export interface TypeMapCb<GlobalOmitOptions = {}> extends runtime.Types.Utils.Fn<{
@@ -260,7 +261,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "adminUser" | "role" | "permission";
+        modelProps: "user" | "adminUser" | "role" | "permission" | "rolePermission";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -560,6 +561,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        RolePermission: {
+            payload: Prisma.$RolePermissionPayload<ExtArgs>;
+            fields: Prisma.RolePermissionFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.RolePermissionFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.RolePermissionFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>;
+                };
+                findFirst: {
+                    args: Prisma.RolePermissionFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.RolePermissionFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>;
+                };
+                findMany: {
+                    args: Prisma.RolePermissionFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>[];
+                };
+                create: {
+                    args: Prisma.RolePermissionCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>;
+                };
+                createMany: {
+                    args: Prisma.RolePermissionCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.RolePermissionCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>[];
+                };
+                delete: {
+                    args: Prisma.RolePermissionDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>;
+                };
+                update: {
+                    args: Prisma.RolePermissionUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.RolePermissionDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.RolePermissionUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.RolePermissionUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>[];
+                };
+                upsert: {
+                    args: Prisma.RolePermissionUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RolePermissionPayload>;
+                };
+                aggregate: {
+                    args: Prisma.RolePermissionAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateRolePermission>;
+                };
+                groupBy: {
+                    args: Prisma.RolePermissionGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.RolePermissionGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.RolePermissionCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.RolePermissionCountAggregateOutputType> | number;
+                };
+            };
+        };
     };
 } & {
     other: {
@@ -622,6 +697,11 @@ export declare const PermissionScalarFieldEnum: {
     readonly description: 'description';
 };
 export type PermissionScalarFieldEnum = (typeof PermissionScalarFieldEnum)[keyof typeof PermissionScalarFieldEnum];
+export declare const RolePermissionScalarFieldEnum: {
+    readonly roleId: 'roleId';
+    readonly permissionId: 'permissionId';
+};
+export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: 'asc';
     readonly desc: 'desc';
@@ -823,6 +903,7 @@ export type GlobalOmitConfig = {
     adminUser?: Prisma.AdminUserOmit;
     role?: Prisma.RoleOmit;
     permission?: Prisma.PermissionOmit;
+    rolePermission?: Prisma.RolePermissionOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';
 export type LogDefinition = {

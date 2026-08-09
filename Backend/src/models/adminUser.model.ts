@@ -1,5 +1,5 @@
-import { prisma } from "../../config/db.js";
-import { Prisma } from "../../generated/prisma/client.js";
+import { prisma } from "../config/db.js"
+import { Prisma } from "../generated/prisma/client.js";
 
 export async function createAdmin(data: Prisma.AdminUserCreateInput) {
   return await prisma.adminUser.create({
@@ -21,12 +21,13 @@ export async function findByEmailAdmin(args: Prisma.AdminUserFindUniqueArgs) {
   return prisma.adminUser.findUnique(args);
 }
 
-export async function findByIdAdmin(id: number) {
-  return await prisma.adminUser.findUnique({
-    where: { id },
-  });
+export async function findAdminById<
+  T extends Prisma.AdminUserFindUniqueArgs
+>(
+  args: Prisma.SelectSubset<T, Prisma.AdminUserFindUniqueArgs>
+) {
+  return prisma.adminUser.findUnique(args);
 }
-
 export async function deleteAdmin(id: number) {
   return await prisma.adminUser.delete({
     where: { id },

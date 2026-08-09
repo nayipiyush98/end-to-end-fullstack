@@ -1,10 +1,12 @@
-import { API_HOST, API_TOKEN_COOKIE_KEY } from "@/lib/constants";
+import { API_HOST } from "@/lib/constants";
 import axios, { AxiosError } from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import {useAuthStore} from "@/store/auth.store";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_HOST, // http://localhost:3000/api
   timeout: 10000,
+   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,7 +15,7 @@ const axiosInstance: AxiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(API_TOKEN_COOKIE_KEY);
+    const token = useAuthStore.getState().accessToken;
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
