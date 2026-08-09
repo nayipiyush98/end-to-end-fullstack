@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Monitor,
-  ListTodo,
   HelpCircle,
   Bell,
   Package,
@@ -13,6 +12,9 @@ import {
   MessagesSquare,
   Command,
   GalleryVerticalEnd,
+  Box,
+  Receipt,
+  FingerprintPattern
 } from 'lucide-react'
 
 const URL_PREFIX = '/admin';
@@ -47,7 +49,7 @@ export const sidebarData = {
         {
           title: 'Products',
           url: `${URL_PREFIX}/products`,
-          icon: ListTodo,
+          icon: Box,
         },
         {
           title: 'Categories',
@@ -57,7 +59,7 @@ export const sidebarData = {
         {
           title: 'Orders',
           url: `${URL_PREFIX}/orders`,
-          icon: MessagesSquare,
+          icon: Receipt,
         },
         {
           title: 'Chats',
@@ -69,6 +71,11 @@ export const sidebarData = {
           title: 'Users',
           url: '/users',
           icon: Users,
+        },
+        {
+          title: 'Security',
+          url: '/roles',
+          icon: FingerprintPattern,
         }
       ],
     },
