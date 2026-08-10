@@ -74,15 +74,10 @@ export function useAuth() {
     try {
       setLoading(true);
 
-      console.log("REFRESH START");
 
       // 1. Get new access token
       const refreshResponse = await refresh();
 
-      console.log(
-        "REFRESH RESPONSE:",
-        refreshResponse
-      );
 
       // 2. IMPORTANT:
       // Store new access token BEFORE calling /me
@@ -90,17 +85,10 @@ export function useAuth() {
         refreshResponse.accessToken
       );
 
-      console.log(
-        "NEW TOKEN STORED IN ZUSTAND"
-      );
 
       // 3. Now Axios can read the token
       const adminResponse = await me();
 
-      console.log(
-        "ME RESPONSE:",
-        adminResponse
-      );
 
       // 4. Store admin information
       setAuth(
@@ -108,7 +96,6 @@ export function useAuth() {
         adminResponse
       );
 
-      console.log("AUTH RESTORED");
 
       return true;
 

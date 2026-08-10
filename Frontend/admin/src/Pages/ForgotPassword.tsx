@@ -33,8 +33,6 @@ export function ForgotPassword({ className, ...props }: React.ComponentProps<"di
   });
 
   const onSubmit = async (data: z.infer<typeof loginFormSchema>) => {
-    // Data here is guaranteed to be validated and strictly typed
-    console.log("Valid Form Data:", data);
   };
 
   return (

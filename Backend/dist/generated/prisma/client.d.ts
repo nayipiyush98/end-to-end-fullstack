@@ -46,4 +46,14 @@ export type Permission = Prisma.PermissionModel;
  *
  */
 export type RolePermission = Prisma.RolePermissionModel;
+/**
+ * Model Product
+ *
+ */
+export type Product = Prisma.ProductModel;
+/**
+ * Model Category
+ *
+ */
+export type Category = Prisma.CategoryModel;
 //# sourceMappingURL=client.d.ts.map

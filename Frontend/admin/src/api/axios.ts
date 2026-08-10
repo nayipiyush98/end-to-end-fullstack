@@ -29,11 +29,7 @@ axiosInstance.interceptors.request.use(
 // Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    console.error(error.response?.data || error.message);
-
-    return Promise.reject(error);
-  }
+  (error: AxiosError) => Promise.reject(error)
 );
 
 // Reusable API Methods

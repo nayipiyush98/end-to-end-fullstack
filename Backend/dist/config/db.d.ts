@@ -1,5 +1,5 @@
 import "dotenv/config";
-declare const prisma: import("../generated/prisma/internal/class.js").PrismaClient<"error" | "info" | "query" | "warn", import("../generated/prisma/internal/prismaNamespace.js").GlobalOmitConfig | undefined, import("@prisma/client/runtime/client").DefaultArgs>;
+declare const prisma: import("../generated/prisma/internal/class.js").PrismaClient<never, import("../generated/prisma/internal/prismaNamespace.js").GlobalOmitConfig | undefined, import("@prisma/client/runtime/client").DefaultArgs>;
 declare function connectDB(): Promise<void>;
 export { prisma, connectDB };
 //# sourceMappingURL=db.d.ts.map

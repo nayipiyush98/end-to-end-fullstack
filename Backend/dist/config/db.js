@@ -6,7 +6,6 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({
     adapter,
-    log: ["query", "info", "warn", "error"],
 });
 async function connectDB() {
     try {

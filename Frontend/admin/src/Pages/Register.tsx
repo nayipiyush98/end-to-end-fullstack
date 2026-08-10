@@ -55,10 +55,6 @@ export function Register({ className, ...props }: React.ComponentProps<"div">) {
         }, 2000);
       }
     } catch (error: any) {
-       console.log("Error:", error);
-  console.log("Status:", error.response?.status);
-  console.log("Response:", error.response?.data);
-
   if (error.response?.status === 429) {
     showAlert({
       variant: "destructive",

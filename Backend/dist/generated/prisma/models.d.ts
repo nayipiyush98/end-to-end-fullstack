@@ -3,5 +3,7 @@ export type * from './models/AdminUser.js';
 export type * from './models/Role.js';
 export type * from './models/Permission.js';
 export type * from './models/RolePermission.js';
+export type * from './models/Product.js';
+export type * from './models/Category.js';
 export type * from './commonInputTypes.js';
 //# sourceMappingURL=models.d.ts.map

@@ -14,11 +14,9 @@ export function AuthProvider({
   useEffect(() => {
     const initialize = async () => {
       try {
-        console.log("Auth initialization started");
 
-        const result = await initializeAuth();
 
-        console.log("Auth initialization result:", result);
+        await initializeAuth();
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {

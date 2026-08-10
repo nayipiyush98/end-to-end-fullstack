@@ -1,0 +1,107 @@
+import { Prisma } from "../generated/prisma/client.js";
+export declare function findProducts(args: Prisma.ProductFindManyArgs): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}[]>;
+export declare function findProductById(args: Prisma.ProductFindUniqueArgs): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+} | null>;
+export declare function countProducts(args: Prisma.ProductCountArgs): Promise<number>;
+export declare function createProduct(args: Prisma.ProductCreateArgs): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function updateProduct(args: Prisma.ProductUpdateArgs): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function updateProductStock(id: number, stock: number): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function deleteProduct(args: Prisma.ProductDeleteArgs): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function archiveProduct(id: number): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function addProductImages(id: number, imageUrls: string[]): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    price: import("@prisma/client-runtime-utils").Decimal;
+    stock: number;
+    sku: string;
+    images: string[];
+    categoryId: number;
+    isArchived: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+//# sourceMappingURL=product.model.d.ts.map

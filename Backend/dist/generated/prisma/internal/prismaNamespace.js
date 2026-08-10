@@ -72,7 +72,9 @@ export const ModelName = {
     AdminUser: 'AdminUser',
     Role: 'Role',
     Permission: 'Permission',
-    RolePermission: 'RolePermission'
+    RolePermission: 'RolePermission',
+    Product: 'Product',
+    Category: 'Category'
 };
 /**
  * Enums
@@ -110,6 +112,25 @@ export const PermissionScalarFieldEnum = {
 export const RolePermissionScalarFieldEnum = {
     roleId: 'roleId',
     permissionId: 'permissionId'
+};
+export const ProductScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    price: 'price',
+    stock: 'stock',
+    sku: 'sku',
+    images: 'images',
+    categoryId: 'categoryId',
+    isArchived: 'isArchived',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const CategoryScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    slug: 'slug',
+    parentId: 'parentId'
 };
 export const SortOrder = {
     asc: 'asc',

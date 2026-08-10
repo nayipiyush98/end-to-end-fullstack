@@ -515,12 +515,8 @@ export async function adminRefreshToken(
   res: Response,
 ): Promise<void> {
   try {
-     console.log("=== ADMIN REFRESH ===");
-    console.log("Cookies:", req.cookies);
-
     const refreshToken = req.cookies.refreshToken;
 
-    console.log("Refresh token:", refreshToken);
 
     if (!refreshToken) {
       res.status(401).json({
@@ -531,7 +527,6 @@ export async function adminRefreshToken(
 
       const adminId = verifyAdminRefreshToken(refreshToken);
 
-        console.log("Admin ID:", adminId);
 
       const admin = await findAdminById({
         where: {
@@ -548,7 +543,6 @@ export async function adminRefreshToken(
       
       const accessToken = generateAdminAccessToken(admin);
 
-        console.log("✅ New access token generated");
       
       res.status(200).json({
         message: "Access token refreshed successfully",

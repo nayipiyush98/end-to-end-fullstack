@@ -59,9 +59,6 @@ export function Login({ className, ...props }: React.ComponentProps<"div">) {
         }, 2000);
       }
     } catch (error: any) {
-      console.log(error);
-      console.log(error.response);
-      console.log(error.response?.status);
       if (error.response?.status === 429) {
         showAlert({
           variant: "destructive",

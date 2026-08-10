@@ -31,6 +31,8 @@ export declare const ModelName: {
     readonly Role: 'Role';
     readonly Permission: 'Permission';
     readonly RolePermission: 'RolePermission';
+    readonly Product: 'Product';
+    readonly Category: 'Category';
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -73,6 +75,27 @@ export declare const RolePermissionScalarFieldEnum: {
     readonly permissionId: 'permissionId';
 };
 export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum];
+export declare const ProductScalarFieldEnum: {
+    readonly id: 'id';
+    readonly name: 'name';
+    readonly description: 'description';
+    readonly price: 'price';
+    readonly stock: 'stock';
+    readonly sku: 'sku';
+    readonly images: 'images';
+    readonly categoryId: 'categoryId';
+    readonly isArchived: 'isArchived';
+    readonly createdAt: 'createdAt';
+    readonly updatedAt: 'updatedAt';
+};
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum];
+export declare const CategoryScalarFieldEnum: {
+    readonly id: 'id';
+    readonly name: 'name';
+    readonly slug: 'slug';
+    readonly parentId: 'parentId';
+};
+export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: 'asc';
     readonly desc: 'desc';
