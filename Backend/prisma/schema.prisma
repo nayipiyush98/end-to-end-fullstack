@@ -48,3 +48,28 @@ model RolePermission {
 
   @@id([roleId, permissionId])
 }
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal
+  stock       Int      @default(0)
+  sku         String   @unique
+  images      String[]
+  categoryId  Int
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  parentId Int?
+
+  products Product[]
+}
