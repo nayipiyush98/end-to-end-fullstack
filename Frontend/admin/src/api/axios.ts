@@ -1,10 +1,10 @@
-import { API_HOST } from "@/lib/constants";
+import { API_BASE_URL } from "@/lib/constants";
 import axios, { AxiosError } from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import {useAuthStore} from "@/store/auth.store";
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: API_HOST, // http://localhost:3000/api
+  baseURL: API_BASE_URL, // http://localhost:3000/api
   timeout: 10000,
    withCredentials: true,
   headers: {
