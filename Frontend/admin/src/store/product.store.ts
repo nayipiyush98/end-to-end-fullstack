@@ -1,7 +1,10 @@
 import { create } from "zustand";
+
 import {
   getProducts,
-  deleteProduct,
+  deleteProduct as deleteProductApi,
+  deleteProducts as deleteProductsApi,
+   updateProductStock,
   type Product,
   type Pagination,
 } from "@/api/product.api";
@@ -21,12 +24,21 @@ interface ProductState {
     minPrice?: number;
     maxPrice?: number;
     sort?: string;
+      isArchived?: boolean;
   }) => Promise<void>;
 
+  
   deleteProduct: (id: number) => Promise<void>;
+
+  deleteProducts: (ids: number[]) => Promise<void>;
+
+  updateStock: (
+  ids: number[],
+  stock: number
+) => Promise<void>;
 }
 
-export const useProductStore = create<ProductState>((set) => ({
+export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
   pagination: null,
 
@@ -62,6 +74,8 @@ export const useProductStore = create<ProductState>((set) => ({
     }
   },
 
+
+
   deleteProduct: async (id) => {
     try {
       set({
@@ -69,14 +83,14 @@ export const useProductStore = create<ProductState>((set) => ({
         error: null,
       });
 
-      await deleteProduct(id);
+      await deleteProductApi(id);
 
+      const pagination = get().pagination;
 
-      set((state) => ({
-        products: state.products.filter(
-          (product) => product.id !== id
-        ),
-      }));
+      await get().fetchProducts({
+        page: pagination?.page ?? 1,
+        limit: pagination?.limit ?? 10,
+      });
     } catch (error) {
       console.error("DELETE PRODUCT ERROR:", error);
 
@@ -86,10 +100,87 @@ export const useProductStore = create<ProductState>((set) => ({
             ? error.message
             : "Failed to delete product",
       });
+
+      throw error;
     } finally {
       set({
         isLoading: false,
       });
     }
   },
+
+
+
+  deleteProducts: async (ids) => {
+    try {
+      set({
+        isLoading: true,
+        error: null,
+      });
+
+      await deleteProductsApi(ids);
+
+      const pagination = get().pagination;
+
+      await get().fetchProducts({
+        page: pagination?.page ?? 1,
+        limit: pagination?.limit ?? 10,
+      });
+    } catch (error) {
+      console.error("BULK DELETE PRODUCT ERROR:", error);
+
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete products",
+      });
+
+      throw error;
+    } finally {
+      set({
+        isLoading: false,
+      });
+    }
+  },
+
+  updateStock: async (ids, stock) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    await Promise.all(
+      ids.map((id) =>
+        updateProductStock(id, stock)
+      )
+    );
+
+    const pagination = get().pagination;
+
+    await get().fetchProducts({
+      page: pagination?.page ?? 1,
+      limit: pagination?.limit ?? 10,
+    });
+  } catch (error) {
+    console.error(
+      "UPDATE STOCK ERROR:",
+      error
+    );
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to update stock",
+    });
+
+    throw error;
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
 }));

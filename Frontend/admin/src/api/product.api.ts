@@ -3,7 +3,8 @@ import {
   productsResponseSchema,
   type ProductsResponse,
   type Product,
-  type Pagination
+  type Pagination,
+  productSchema
 } from "@/zod/product.schema";
 
 export type {
@@ -21,6 +22,7 @@ export async function getProducts(
     minPrice?: number;
     maxPrice?: number;
     sort?: string;
+    isArchived?: boolean;
   }
 ): Promise<ProductsResponse> {
  const response = await api.get("/products", {
@@ -30,8 +32,74 @@ export async function getProducts(
   return productsResponseSchema.parse(response);
 }
 
+export async function getProductById(
+  id: number
+): Promise<Product> {
+  const response = await api.get(`/products/${id}`);
+
+  return productSchema.parse(response.data);
+}
+
+
+export async function createProduct(
+  data: FormData
+) {
+  const response = await api.post(
+    "/products",
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response;
+}
+
+
+export async function updateProduct(
+  id: number,
+  data: FormData
+) {
+  const response = await api.put(
+    `/products/${id}`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response;
+}
+
+
+
+export const deleteProducts = async (ids: number[]) => {
+  const response = await api.delete("/products", {
+    data: {
+      ids,
+    },
+  });
+
+  return response.data;
+};
+
 export const deleteProduct = async (id: number) => {
   const response = await api.delete(`/products/${id}`);
 
   return response.data;
+};
+
+export const updateProductStock = async (
+  id: number,
+  stock: number
+) => {
+  const response = await api.patch(`/products/${id}/stock`, {
+    stock,
+  });
+
+  return response;
 };

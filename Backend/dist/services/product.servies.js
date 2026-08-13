@@ -1,9 +1,12 @@
 import { findProducts, countProducts, findProductById, createProduct, updateProduct, updateProductStock, archiveProduct, addProductImages, } from "../models/product.model.js";
+import { prisma } from "../config/db.js";
 export async function getProducts(query) {
     const { page, limit, search, category, minPrice, maxPrice, sort } = query;
     const skip = (page - 1) * limit;
     const where = {
-        isArchived: false,
+        ...(query.isArchived !== undefined && {
+            isArchived: query.isArchived,
+        }),
         ...(search && {
             OR: [
                 {
@@ -70,7 +73,7 @@ export async function getProducts(query) {
         findProducts({
             where,
             skip,
-            take: limit,
+            take: query.limit,
             orderBy,
             include: {
                 category: true,
@@ -151,4 +154,16 @@ export async function deleteProductService(id) {
 export async function addProductImagesService(id, imageUrls) {
     return addProductImages(id, imageUrls);
 }
+export const deleteProducts = async (ids) => {
+    return prisma.product.updateMany({
+        where: {
+            id: {
+                in: ids,
+            },
+        },
+        data: {
+            isArchived: true,
+        },
+    });
+};
 //# sourceMappingURL=product.servies.js.map

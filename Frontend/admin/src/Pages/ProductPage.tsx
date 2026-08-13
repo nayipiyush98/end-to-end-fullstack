@@ -1,14 +1,20 @@
+import type { RowSelectionState } from "@tanstack/react-table";
+import { useNavigate } from "react-router-dom";
+import { ProductBulkActions } from "@/components/product/ProductBulkActions";
 import { useEffect, useState } from "react";
 
 import { DataTable } from "@/components/product/data-table";
 import { columns } from "@/components/product/columns";
 import { useProductStore } from "@/store/product.store";
 import { Button } from "../components/ui/button";
+
+import { DeleteProductsDialog2 } from "@/components/product/DeleteProductsDialog2";
 import {
   ChevronsLeft,
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  Plus,
 } from "lucide-react";
 import {
   Select,
@@ -17,8 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UpdateStockDialog } from "@/components/product/UpdateStockDialog";
 
 export function Products() {
+  const [statusFilter, setStatusFilter] = useState<
+  "all" | "active" | "archived"
+>("active");
+  const navigate = useNavigate();
+    const [stockDialogOpen, setStockDialogOpen] =
+  useState(false);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [limit, setLimit] = useState(10);
@@ -28,6 +42,28 @@ export function Products() {
   const pagination = useProductStore((state) => state.pagination);
   const error = useProductStore((state) => state.error);
   const fetchProducts = useProductStore((state) => state.fetchProducts);
+  const deleteProducts = useProductStore(
+  (state) => state.deleteProducts
+);
+const updateStock = useProductStore(
+  (state) => state.updateStock
+);
+
+  const selectedCount = Object.keys(rowSelection).length;
+  const selectedProductIds = Object.keys(
+  rowSelection
+).map(Number);
+
+const handleStatusChange = (
+  value: "all" | "active" | "archived"
+) => {
+  setStatusFilter(value);
+  setPage(1);
+  setRowSelection({});
+};
+
+const [deleteDialogOpen, setDeleteDialogOpen] =
+  useState(false);
 
   const getPageNumbers = () => {
     if (!pagination) return [];
@@ -81,8 +117,12 @@ export function Products() {
       page,
       limit,
       search: debouncedSearch || undefined,
+      isArchived:
+      statusFilter === "all"
+        ? undefined
+        : statusFilter === "archived",
     });
-  }, [debouncedSearch, limit, page, fetchProducts]);
+  }, [debouncedSearch,statusFilter, limit, page, fetchProducts]);
 
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>;
@@ -90,6 +130,7 @@ export function Products() {
 
   return (
     <div>
+        <div className="flex justify-between">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">Products</h1>
 
@@ -97,33 +138,44 @@ export function Products() {
           Manage your products and inventory.
         </p>
       </div>
+      <div className="pt-5">
+        <Button className="px-3 py-2 font-medium"
+     onClick={() => navigate("/admin/products/create")}
+  >
+    Create  <Plus/>
+  </Button>
+      </div>
+      </div>
       <DataTable
         columns={columns}
         data={products}
         search={search}
+          statusFilter={statusFilter}
+  onStatusChange={handleStatusChange}
         onSearchChange={setSearch}
         onReset={() => {
           setSearch("");
           setDebouncedSearch("");
           setPage(1);
         }}
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
       />
-      <div className="mt-6 flex items-center justify-between">
-        <div className="flex">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex mt-4">
           <span className="text-sm pt-1 pr-1">Rows Per Page</span>
           <Select
             value={String(limit)}
             onValueChange={(value) => {
               setLimit(Number(value));
               setPage(1);
+              setRowSelection({});
             }}
           >
             <SelectTrigger className="w-17">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="8">8</SelectItem>
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="25">25</SelectItem>
               <SelectItem value="50">50</SelectItem>
@@ -131,7 +183,60 @@ export function Products() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex">
+        <div className="flex mt-4 flex-1 justify-center">
+  <ProductBulkActions
+    selectedCount={selectedCount}
+
+    onClear={() => {
+      setRowSelection({});
+    }}
+
+    onDelete={() => {
+  setDeleteDialogOpen(true);
+}}
+
+    onUpdateStock={() => {
+    setStockDialogOpen(true);
+  }}
+
+    onUpdateCategory={() => {
+      console.log(
+        "Update category:",
+        rowSelection
+      );
+    }}
+  />
+</div>
+<UpdateStockDialog
+  open={stockDialogOpen}
+  onOpenChange={setStockDialogOpen}
+  selectedCount={selectedCount}
+  onConfirm={async (stock) => {
+    await updateStock(
+      selectedProductIds,
+      stock
+    );
+
+    setRowSelection({});
+  }}
+/>
+<DeleteProductsDialog2
+      open={deleteDialogOpen}
+      onOpenChange={setDeleteDialogOpen}
+      selectedCount={selectedCount}
+      onConfirm={async () => {
+        await deleteProducts(selectedProductIds);
+
+        await fetchProducts({
+          page,
+          limit,
+          search: debouncedSearch || undefined,
+        });
+
+        setRowSelection({});
+      }}
+    />
+        <div className="flex mt-4">
           <p className="text-sm font-medium pt-2 pr-10">
             Page {pagination?.page ?? 1} of {pagination?.totalPages ?? 1}
           </p>

@@ -9,23 +9,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import type { Product } from "@/zod/product.schema";
+
 interface DeleteProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  productName: string;
-  onConfirm: () => void;
-  isDeleting?: boolean;
+  product: Product | null;
+  onConfirm: (id: number[]) => void;
 }
 
 export function DeleteProductDialog({
   open,
   onOpenChange,
-  productName,
+  product,
   onConfirm,
-  isDeleting = false,
 }: DeleteProductDialogProps) {
+  if (!product) return null;
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -34,23 +39,24 @@ export function DeleteProductDialog({
 
           <AlertDialogDescription>
             Are you sure you want to delete{" "}
-            <strong>{productName}</strong>? This product
-            will be archived and removed from the product
-            list.
+            <strong>{product.name}</strong>?
+
+            <br />
+
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>
+          <AlertDialogCancel>
             Cancel
           </AlertDialogCancel>
 
           <AlertDialogAction
-            variant="destructive"
-            disabled={isDeleting}
-            onClick={onConfirm}
+            onClick={() => onConfirm([product.id])}
+            className="bg-red-600 hover:bg-red-700"
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

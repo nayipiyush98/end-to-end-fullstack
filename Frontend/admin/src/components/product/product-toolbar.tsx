@@ -45,7 +45,7 @@ export function ProductToolbar({
         )}
       </div>
 
-      {/* Columns */}
+  
       <DropdownMenu>
         <DropdownMenuTrigger
           render={

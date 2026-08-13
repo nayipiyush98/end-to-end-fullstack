@@ -67,9 +67,22 @@ export const productQuerySchema = z.object({
         "name_desc",
     ])
         .default("newest"),
+    isArchived: z
+        .preprocess((value) => {
+        if (value === "true")
+            return true;
+        if (value === "false")
+            return false;
+        return undefined;
+    }, z.boolean().optional()),
 });
 export const updateProductSchema = createProductSchema.partial();
 export const updateStockSchema = z.object({
     stock: z.coerce.number().int().min(0),
+});
+export const deleteProductsSchema = z.object({
+    ids: z
+        .array(z.number().int().positive())
+        .min(1, "At least one product is required"),
 });
 //# sourceMappingURL=productZod.js.map

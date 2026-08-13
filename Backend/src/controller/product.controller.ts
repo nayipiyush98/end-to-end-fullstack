@@ -4,6 +4,7 @@ import {
   createProductSchema,
   updateProductSchema,
   updateStockSchema,
+  deleteProductsSchema,
 } from "../zod/productZod.js";
 import {
   getProducts,
@@ -13,6 +14,7 @@ import {
   updateStockService,
   deleteProductService,
   addProductImagesService,
+  deleteProducts,
 } from "../services/product.servies.js";
 
 export async function getProductsController(
@@ -54,7 +56,7 @@ export async function getProductByIdController(
 
     const product = await getProductById(id);
 
-    if (!product || product.isArchived) {
+    if (!product) {
       res.status(404).json({
         message: "Product not found",
       });
@@ -256,3 +258,27 @@ export async function addProductImagesController(req:Request,res:Response):Promi
     });
     }
 }
+
+export const deleteProductsController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { ids } = deleteProductsSchema.parse(req.body);
+
+    const result = await deleteProducts(ids);
+
+    return res.status(200).json({
+      success: true,
+      message: "Products deleted successfully",
+      count: result.count,
+    });
+  } catch (error) {
+    console.error("DELETE PRODUCTS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete products",
+    });
+  }
+};

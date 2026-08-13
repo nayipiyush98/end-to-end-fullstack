@@ -5,15 +5,9 @@ import {
   type SortingState,
   type ColumnFiltersState,
   type ColumnVisibilityState,
+  type RowSelectionState,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import * as React from "react";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ProductToolbar } from "./product-toolbar";
 
 import {
@@ -28,11 +22,33 @@ import {
 import { features, type DataTableFeatures } from "./data-table-features";
 
 interface DataTableProps<TData extends RowData> {
-  columns: ColumnDef<DataTableFeatures, TData>[];
+  columns: (
+    statusFilter: "all" | "active" | "archived",
+    onStatusChange: (
+      value: "all" | "active" | "archived"
+    ) => void
+  ) => ColumnDef<DataTableFeatures, TData>[];
+
   data: TData[];
 
+  statusFilter: "all" | "active" | "archived";
+
+  onStatusChange: (
+    value: "all" | "active" | "archived"
+  ) => void;
+
+  rowSelection: RowSelectionState;
+
+  onRowSelectionChange: (
+    updater:
+      | RowSelectionState
+      | ((old: RowSelectionState) => RowSelectionState)
+  ) => void;
+
   search: string;
+
   onSearchChange: (value: string) => void;
+
   onReset: () => void;
 }
 
@@ -40,24 +56,49 @@ export function DataTable<TData extends RowData>({
   columns,
   data,
   search,
+  rowSelection,
+  onRowSelectionChange,
   onSearchChange,
   onReset,
+  statusFilter,
+  onStatusChange,
 }: DataTableProps<TData>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+  const [sorting, setSorting] =
+    React.useState<SortingState>([]);
+
+  const [columnFilters, setColumnFilters] =
+    React.useState<ColumnFiltersState>([]);
+
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+
+
+  const tableColumns = React.useMemo(
+    () => columns(statusFilter, onStatusChange),
+    [columns, statusFilter, onStatusChange]
+  );
+
   const table = useTable({
     features,
+
     data,
-    columns,
+
+    columns: tableColumns,
+
+    getRowId: (row) => {
+      return String(
+        (row as TData & { id: number }).id
+      );
+    },
+
     onSortingChange: setSorting,
+
     onColumnFiltersChange: setColumnFilters,
+
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+
+    onRowSelectionChange,
+
     state: {
       sorting,
       columnFilters,
@@ -68,36 +109,37 @@ export function DataTable<TData extends RowData>({
 
   return (
     <div>
-       <ProductToolbar
-      search={search}
-      onSearchChange={onSearchChange}
-      onReset={onReset}
-      table={table}
-    />
-      
+      <ProductToolbar
+        search={search}
+        onSearchChange={onSearchChange}
+        onReset={onReset}
+        table={table}
+      />
+
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : (
-                        <table.FlexRender header={header} />
-                      )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder ? null : (
+                      <table.FlexRender header={header} />
+                    )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={
+                    row.getIsSelected() && "selected"
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -109,7 +151,7 @@ export function DataTable<TData extends RowData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
                   No results.
@@ -118,24 +160,6 @@ export function DataTable<TData extends RowData>({
             )}
           </TableBody>
         </Table>
-        {/*  <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div> */}
       </div>
     </div>
   );

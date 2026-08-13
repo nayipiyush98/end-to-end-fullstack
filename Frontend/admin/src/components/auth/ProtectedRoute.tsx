@@ -6,6 +6,8 @@ export default function ProtectedRoute() {
     const isLoading = useAuthStore((state) => state.isLoading);
     const admin = useAuthStore((state) => state.admin);
 
+
+
     if (isLoading) {
         return <div>Loading...</div>;
     }

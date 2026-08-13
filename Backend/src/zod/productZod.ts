@@ -83,6 +83,13 @@ export const productQuerySchema = z.object({
       "name_desc",
     ])
     .default("newest"),
+
+    isArchived: z
+  .preprocess((value) => {
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return undefined;
+  }, z.boolean().optional()),
 });
 
   export type ProductQuery = z.infer<typeof productQuerySchema>;
@@ -97,3 +104,9 @@ export type UpdateProductInput =
 });
 
 export type UpdateStockInput = z.infer<typeof updateStockSchema>;
+
+export const deleteProductsSchema = z.object({
+  ids: z
+    .array(z.number().int().positive())
+    .min(1, "At least one product is required"),
+});

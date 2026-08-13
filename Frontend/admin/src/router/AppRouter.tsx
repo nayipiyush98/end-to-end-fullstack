@@ -5,6 +5,7 @@ import { Login } from "@/Pages/LoginPage";
 import { Register } from "@/Pages/Register";
 import { ForgotPassword } from "@/Pages/ForgotPassword";
 import { Products } from "@/Pages/ProductPage";
+import { AddEditProductPage } from "@/Pages/AddEditProductPage";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminLayout from "@/components/layout/AdminLayout";
@@ -41,6 +42,14 @@ function AppRouter() {
         <Route element={<AdminLayout />}>
           <Route path={ADMIN_URL} element={<Dashboard />} />
           <Route path={`${ADMIN_URL}/products`} element={<Products />} />
+          <Route
+            path={`${ADMIN_URL}/products/create`}
+            element={<AddEditProductPage />}
+          />
+          <Route
+            path={`${ADMIN_URL}/products/edit/:id`}
+            element={<AddEditProductPage />}
+          />
           <Route path={`${ADMIN_URL}/orders`} element={<Orders />} />
           <Route path={`${ADMIN_URL}/categories`} element={<Categories />} />
           <Route path={`${ADMIN_URL}/chats`} element={<Chats />} />

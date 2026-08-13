@@ -24,6 +24,7 @@ export declare const productQuerySchema: z.ZodObject<{
         price_asc: "price_asc";
         price_desc: "price_desc";
     }>>;
+    isArchived: z.ZodPreprocess<z.ZodOptional<z.ZodBoolean>>;
 }, z.core.$strip>;
 export type ProductQuery = z.infer<typeof productQuerySchema>;
 export declare const updateProductSchema: z.ZodObject<{
@@ -40,4 +41,7 @@ export declare const updateStockSchema: z.ZodObject<{
     stock: z.ZodCoercedNumber<unknown>;
 }, z.core.$strip>;
 export type UpdateStockInput = z.infer<typeof updateStockSchema>;
+export declare const deleteProductsSchema: z.ZodObject<{
+    ids: z.ZodArray<z.ZodNumber>;
+}, z.core.$strip>;
 //# sourceMappingURL=productZod.d.ts.map

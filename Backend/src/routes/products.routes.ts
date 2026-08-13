@@ -7,6 +7,7 @@ import {
   updateStockController,
   deleteProductController,
   addProductImagesController,
+  deleteProductsController
 } from "../controller/product.controller.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { authorize } from "../middleware/authorize.js";
@@ -41,12 +42,19 @@ productRoutes.delete(
   authorize("delete_product"),
   deleteProductController,
 );
-productRoutes.post("/products/:id/images",
-    adminAuth,
-    authorize("update_product"),
-    uploadProductImages.array("images", 5),
-    addProductImagesController
-)
+productRoutes.delete(
+  "/products/",
+  adminAuth,
+  authorize("delete_product"),
+  deleteProductsController,
+);
+productRoutes.post(
+  "/products/:id/images",
+  adminAuth,
+  authorize("update_product"),
+  uploadProductImages.array("images", 5),
+  addProductImagesController,
+);
 /** * User Routes */
 
 productRoutes.get("/products", getProductsController);

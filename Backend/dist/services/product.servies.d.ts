@@ -1,3 +1,4 @@
+import type { Prisma } from "../generated/prisma/client.js";
 import type { CreateProductData, ProductQuery, UpdateProductInput } from "../zod/productZod.js";
 export declare function getProducts(query: ProductQuery): Promise<{
     products: {
@@ -100,4 +101,5 @@ export declare function addProductImagesService(id: number, imageUrls: string[])
     createdAt: Date;
     updatedAt: Date;
 }>;
+export declare const deleteProducts: (ids: number[]) => Promise<Prisma.BatchPayload>;
 //# sourceMappingURL=product.servies.d.ts.map

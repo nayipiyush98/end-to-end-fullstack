@@ -1,27 +1,23 @@
-
-
 import { createColumnHelper } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { API_HOST } from "@/lib/constants";
-import { useState } from "react";
-import { DeleteProductDialog } from "./deletePorductDialog";
-import { useProductStore } from "@/store/product.store";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { ProductActions } from "./ProductActions";
 import type { Product } from "@/zod/product.schema";
 import { type DataTableFeatures } from "./data-table-features"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+
 
 
 
 const columnHelper = createColumnHelper<DataTableFeatures,Product>()
 
-export const columns = columnHelper.columns([
+export const columns = (
+  statusFilter: "all" | "active" | "archived",
+  onStatusChange: (
+    value: "all" | "active" | "archived"
+  ) => void
+) => {
+  return columnHelper.columns([
     columnHelper.display({
     id: "select",
     header: ({ table }) => (
@@ -101,7 +97,7 @@ export const columns = columnHelper.columns([
 
     return (
       <div className="font-medium">
-        ₹{price.toLocaleString("en-IN")}
+        ${price.toLocaleString("en-US")}
       </div>
     );
   },
@@ -125,105 +121,62 @@ export const columns = columnHelper.columns([
     );
   },
 }),
-   columnHelper.accessor("isArchived", {
-    header: "Status",
-
-    cell: ({ row }) => {
-      const isArchived = row.getValue("isArchived");
-
-      return (
-        <span
-          className={
-            isArchived
-              ? "text-sm text-red-500"
-              : "text-sm text-green-600"
+    columnHelper.accessor("isArchived", {
+      header: () => (
+        <Select
+          value={statusFilter}
+          onValueChange={(value) =>
+            onStatusChange(
+              value as "all" | "active" | "archived"
+            )
           }
         >
-          {isArchived ? "Archived" : "Active"}
-        </span>
-      );
-    },
-  }),
+          <SelectTrigger className="h-8 w-30 border-0 shadow-none">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="all">
+              All
+            </SelectItem>
+
+            <SelectItem value="active">
+              Active
+            </SelectItem>
+
+            <SelectItem value="archived">
+              Archived
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      ),
+
+      cell: ({ row }) => {
+        const isArchived = row.getValue("isArchived");
+
+        return (
+          <span
+            className={
+              isArchived
+                ? "text-sm text-red-500"
+                : "text-sm text-green-600"
+            }
+          >
+            {isArchived ? "Archived" : "Active"}
+          </span>
+        );
+      },
+    }),
 columnHelper.display({
   id: "actions",
+  header:"Action",
   enableHiding: false,
 
   cell: ({ row }) => {
-    const product = row.original;
 
-    return <ProductActions product={product} />;
+    return <ProductActions product={row.original} />;
   },
 }),
 ])
 
-function ProductActions({ product }: { product: Product }) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const deleteProduct = useProductStore(
-    (state) => state.deleteProduct
-  );
-
-  const isLoading = useProductStore(
-    (state) => state.isLoading
-  );
-
-  const handleDelete = async () => {
-    try {
-      await deleteProduct(product.id);
-
-      setDeleteDialogOpen(false);
-    } catch (error) {
-      console.error("DELETE PRODUCT ERROR:", error);
-    }
-  };
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-
-              <span className="sr-only">
-                Open actions
-              </span>
-            </Button>
-          }
-        />
-
-        <DropdownMenuContent align="end">
-
-          <DropdownMenuItem
-            onClick={() => {
-              console.log("Edit product:", product.id);
-            }}
-          >
-            Edit
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            className="text-red-400"
-            onClick={() => {
-              setDeleteDialogOpen(true);
-            }}
-          >
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <DeleteProductDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        productName={product.name}
-        onConfirm={handleDelete}
-        isDeleting={isLoading}
-      />
-    </>
-  );
 }

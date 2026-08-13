@@ -14,6 +14,7 @@ import type {
   ProductQuery,
   UpdateProductInput,
 } from "../zod/productZod.js";
+import { prisma } from "../config/db.js";
 
 export async function getProducts(query: ProductQuery) {
   const { page, limit, search, category, minPrice, maxPrice, sort } = query;
@@ -21,7 +22,10 @@ export async function getProducts(query: ProductQuery) {
   const skip = (page - 1) * limit;
 
   const where: Prisma.ProductWhereInput = {
-    isArchived: false,
+    ...(query.isArchived !== undefined && {
+    isArchived: query.isArchived,
+  }),
+
 
     ...(search && {
       OR: [
@@ -100,7 +104,7 @@ export async function getProducts(query: ProductQuery) {
     findProducts({
       where,
       skip,
-      take: limit,
+      take: query.limit,
       orderBy,
 
       include: {
@@ -203,3 +207,16 @@ export async function addProductImagesService(
 ) {
   return addProductImages(id, imageUrls);
 }
+
+export const deleteProducts = async (ids: number[]) => {
+  return prisma.product.updateMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+    data: {
+      isArchived: true,
+    },
+  });
+};
