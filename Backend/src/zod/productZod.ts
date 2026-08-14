@@ -32,6 +32,8 @@ export const createProductSchema = z.object({
     .min(1, "SKU is required")
     .max(100),
 
+  isArchived: z.boolean().default(false),
+
   images: z
     .array(z.string())
     .default([]),

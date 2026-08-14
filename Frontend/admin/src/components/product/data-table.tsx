@@ -78,7 +78,7 @@ export function DataTable<TData extends RowData>({
     [columns, statusFilter, onStatusChange]
   );
 
-  const table = useTable({
+  const table = useTable<DataTableFeatures, TData>({
     features,
 
     data,

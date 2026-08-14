@@ -15,7 +15,12 @@ export const columns = (
   statusFilter: "all" | "active" | "archived",
   onStatusChange: (
     value: "all" | "active" | "archived"
-  ) => void
+  ) => void,
+   sort: "" | "price_asc" | "price_desc",
+  onSortChange: (
+    value: "" | "price_asc" | "price_desc"
+  )=> void
+  
 ) => {
   return columnHelper.columns([
     columnHelper.display({
@@ -89,8 +94,38 @@ export const columns = (
       </div>
     ),
   }),
-   columnHelper.accessor("price", {
-  header: "Price",
+columnHelper.accessor("price", {
+  id: "price",
+
+  header: () => (
+    <Select
+      value={sort || "none"}
+      onValueChange={(value) => {
+        const v = value ?? "none";
+        onSortChange(
+          (v === "none" ? "" : (v as "" | "price_asc" | "price_desc"))
+        );
+      }}
+    >
+      <SelectTrigger className="h-8 w-35 border-0 shadow-none">
+        <SelectValue placeholder="Price" />
+      </SelectTrigger>
+
+      <SelectContent>
+        <SelectItem value="none">
+          Price
+        </SelectItem>
+
+        <SelectItem value="price_asc">
+          Low to High
+        </SelectItem>
+
+        <SelectItem value="price_desc">
+          High to Low
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  ),
 
   cell: ({ row }) => {
     const price = row.getValue("price") as number;

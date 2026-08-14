@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ProductBulkActions } from "@/components/product/ProductBulkActions";
 import { useEffect, useState } from "react";
 
-import { DataTable } from "@/components/product/data-table";
+import { DataTable } from "../components/product/data-table";
 import { columns } from "@/components/product/columns";
 import { useProductStore } from "@/store/product.store";
 import { Button } from "../components/ui/button";
@@ -27,11 +27,11 @@ import { UpdateStockDialog } from "@/components/product/UpdateStockDialog";
 
 export function Products() {
   const [statusFilter, setStatusFilter] = useState<
-  "all" | "active" | "archived"
->("active");
+    "all" | "active" | "archived"
+  >("active");
   const navigate = useNavigate();
-    const [stockDialogOpen, setStockDialogOpen] =
-  useState(false);
+  const [stockDialogOpen, setStockDialogOpen] = useState(false);
+  const [sort, setSort] = useState<"" | "price_asc" | "price_desc">("");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -42,28 +42,23 @@ export function Products() {
   const pagination = useProductStore((state) => state.pagination);
   const error = useProductStore((state) => state.error);
   const fetchProducts = useProductStore((state) => state.fetchProducts);
-  const deleteProducts = useProductStore(
-  (state) => state.deleteProducts
-);
-const updateStock = useProductStore(
-  (state) => state.updateStock
-);
+  const deleteProducts = useProductStore((state) => state.deleteProducts);
+  const updateStock = useProductStore((state) => state.updateStock);
 
   const selectedCount = Object.keys(rowSelection).length;
-  const selectedProductIds = Object.keys(
-  rowSelection
-).map(Number);
+  const selectedProductIds = Object.keys(rowSelection).map(Number);
 
-const handleStatusChange = (
-  value: "all" | "active" | "archived"
-) => {
-  setStatusFilter(value);
-  setPage(1);
-  setRowSelection({});
-};
+  const handleStatusChange = (value: "all" | "active" | "archived") => {
+    setStatusFilter(value);
+    setPage(1);
+    setRowSelection({});
+  };
+  const handleSortChange = (value: "" | "price_asc" | "price_desc") => {
+    setSort(value);
+    setPage(1);
+  };
 
-const [deleteDialogOpen, setDeleteDialogOpen] =
-  useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const getPageNumbers = () => {
     if (!pagination) return [];
@@ -117,12 +112,11 @@ const [deleteDialogOpen, setDeleteDialogOpen] =
       page,
       limit,
       search: debouncedSearch || undefined,
+      sort: sort || undefined,
       isArchived:
-      statusFilter === "all"
-        ? undefined
-        : statusFilter === "archived",
+        statusFilter === "all" ? undefined : statusFilter === "archived",
     });
-  }, [debouncedSearch,statusFilter, limit, page, fetchProducts]);
+  }, [debouncedSearch, sort, statusFilter, limit, page, fetchProducts]);
 
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>;
@@ -130,28 +124,32 @@ const [deleteDialogOpen, setDeleteDialogOpen] =
 
   return (
     <div>
-        <div className="flex justify-between">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Products</h1>
+      <div className="flex justify-between">
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold">Products</h1>
 
-        <p className="text-muted-foreground">
-          Manage your products and inventory.
-        </p>
-      </div>
-      <div className="pt-5">
-        <Button className="px-3 py-2 font-medium"
-     onClick={() => navigate("/admin/products/create")}
-  >
-    Create  <Plus/>
-  </Button>
-      </div>
+          <p className="text-muted-foreground">
+            Manage your products and inventory.
+          </p>
+        </div>
+        <div className="pt-5">
+          <Button
+            className="px-3 py-2 font-medium"
+            onClick={() => navigate("/admin/products/create")}
+          >
+            Create <Plus />
+          </Button>
+        </div>
       </div>
       <DataTable
-        columns={columns}
+        columns={(
+          sFilter: "all" | "active" | "archived",
+          onStatus: (value: "all" | "active" | "archived") => void
+        ) => columns(sFilter, onStatus, sort, handleSortChange)}
         data={products}
         search={search}
-          statusFilter={statusFilter}
-  onStatusChange={handleStatusChange}
+        statusFilter={statusFilter}
+        onStatusChange={handleStatusChange}
         onSearchChange={setSearch}
         onReset={() => {
           setSearch("");
@@ -184,58 +182,48 @@ const [deleteDialogOpen, setDeleteDialogOpen] =
           </Select>
         </div>
         <div className="flex mt-4 flex-1 justify-center">
-  <ProductBulkActions
-    selectedCount={selectedCount}
+          <ProductBulkActions
+            selectedCount={selectedCount}
+            onClear={() => {
+              setRowSelection({});
+            }}
+            onDelete={() => {
+              setDeleteDialogOpen(true);
+            }}
+            onUpdateStock={() => {
+              setStockDialogOpen(true);
+            }}
+            onUpdateCategory={() => {
+              console.log("Update category:", rowSelection);
+            }}
+          />
+        </div>
+        <UpdateStockDialog
+          open={stockDialogOpen}
+          onOpenChange={setStockDialogOpen}
+          selectedCount={selectedCount}
+          onConfirm={async (stock) => {
+            await updateStock(selectedProductIds, stock);
 
-    onClear={() => {
-      setRowSelection({});
-    }}
+            setRowSelection({});
+          }}
+        />
+        <DeleteProductsDialog2
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          selectedCount={selectedCount}
+          onConfirm={async () => {
+            await deleteProducts(selectedProductIds);
 
-    onDelete={() => {
-  setDeleteDialogOpen(true);
-}}
+            await fetchProducts({
+              page,
+              limit,
+              search: debouncedSearch || undefined,
+            });
 
-    onUpdateStock={() => {
-    setStockDialogOpen(true);
-  }}
-
-    onUpdateCategory={() => {
-      console.log(
-        "Update category:",
-        rowSelection
-      );
-    }}
-  />
-</div>
-<UpdateStockDialog
-  open={stockDialogOpen}
-  onOpenChange={setStockDialogOpen}
-  selectedCount={selectedCount}
-  onConfirm={async (stock) => {
-    await updateStock(
-      selectedProductIds,
-      stock
-    );
-
-    setRowSelection({});
-  }}
-/>
-<DeleteProductsDialog2
-      open={deleteDialogOpen}
-      onOpenChange={setDeleteDialogOpen}
-      selectedCount={selectedCount}
-      onConfirm={async () => {
-        await deleteProducts(selectedProductIds);
-
-        await fetchProducts({
-          page,
-          limit,
-          search: debouncedSearch || undefined,
-        });
-
-        setRowSelection({});
-      }}
-    />
+            setRowSelection({});
+          }}
+        />
         <div className="flex mt-4">
           <p className="text-sm font-medium pt-2 pr-10">
             Page {pagination?.page ?? 1} of {pagination?.totalPages ?? 1}

@@ -117,6 +117,7 @@ export async function createProductService(data) {
             categoryId: data.categoryId,
             images: data.images,
             sku: data.sku,
+            isArchived: data.isArchived,
         },
         include: {
             category: true,
@@ -136,6 +137,9 @@ export async function updateProductService(id, data) {
             ? { categoryId: data.categoryId }
             : {}),
         ...(data.sku !== undefined ? { sku: data.sku } : {}),
+        ...(data.isArchived !== undefined
+            ? { isArchived: data.isArchived }
+            : {}),
         ...(data.images !== undefined ? { images: data.images } : {}),
     };
     return updateProduct({

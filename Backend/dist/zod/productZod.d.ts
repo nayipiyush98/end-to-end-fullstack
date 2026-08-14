@@ -6,6 +6,7 @@ export declare const createProductSchema: z.ZodObject<{
     stock: z.ZodCoercedNumber<unknown>;
     categoryId: z.ZodCoercedNumber<unknown>;
     sku: z.ZodString;
+    isArchived: z.ZodDefault<z.ZodBoolean>;
     images: z.ZodDefault<z.ZodArray<z.ZodString>>;
 }, z.core.$strip>;
 export type CreateProductData = z.infer<typeof createProductSchema>;
@@ -34,6 +35,7 @@ export declare const updateProductSchema: z.ZodObject<{
     stock: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
     categoryId: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
     sku: z.ZodOptional<z.ZodString>;
+    isArchived: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     images: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
 }, z.core.$strip>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
