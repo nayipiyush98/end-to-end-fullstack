@@ -5,6 +5,7 @@ import { ProductActions } from "./ProductActions";
 import type { Product } from "@/zod/product.schema";
 import { type DataTableFeatures } from "./data-table-features"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { StockBadge } from "./data/stockBadge";
 
 
 
@@ -144,14 +145,9 @@ columnHelper.accessor("price", {
     const stock = row.original.stock;
 
     return (
-      <div
-        className={
-          stock <= 5
-            ? "font-medium text-red-500"
-            : "font-medium"
-        }
-      >
-        {stock}
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{stock}</span>
+        <StockBadge stock={stock} />
       </div>
     );
   },

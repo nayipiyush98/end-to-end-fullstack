@@ -21,21 +21,21 @@ model AdminUser {
   email     String   @unique
   password  String
   roleId    Int?
-  role      Role?     @relation(fields: [roleId], references: [id])
+  role      Role?    @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model Role {
-  id          Int          @id @default(autoincrement())
-  name        String       @unique
-  users       AdminUser[]
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  users           AdminUser[]
   rolePermissions RolePermission[]
 }
 
 model Permission {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String?
   rolePermissions RolePermission[]
 }
 
@@ -43,8 +43,8 @@ model RolePermission {
   roleId       Int
   permissionId Int
 
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
 }
@@ -62,14 +62,16 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  category    Category @relation(fields: [categoryId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
+  id       Int        @id @default(autoincrement())
   name     String
-  slug     String    @unique
+  slug     String     @unique
   parentId Int?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
 
   products Product[]
 }

@@ -5,6 +5,7 @@ import productRoutes from "./routes/products.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import categoriesRoutes from "./routes/categories.routes.js";
 const app = Express();
 const PORT = process.env.PORT || 3000;
 const API_VERSION = process.env.API_VERSION || 'v1';
@@ -19,6 +20,7 @@ async function startServer() {
     await connectDB();
     app.use(`/api/${API_VERSION}/auth`, authRoutes);
     app.use(`/api/${API_VERSION}`, productRoutes);
+    app.use(`/api/${API_VERSION}`, categoriesRoutes);
     app.listen(PORT, () => {
         console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
