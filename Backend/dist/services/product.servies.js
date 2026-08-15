@@ -126,6 +126,15 @@ export async function createProductService(data) {
     return product;
 }
 export async function updateProductService(id, data) {
+    const existingProduct = await prisma.product.findUnique({
+        where: { id },
+        select: {
+            images: true,
+        },
+    });
+    if (!existingProduct) {
+        throw new Error("Product not found");
+    }
     const updateData = {
         ...(data.name !== undefined ? { name: data.name } : {}),
         ...(data.description !== undefined
@@ -140,7 +149,15 @@ export async function updateProductService(id, data) {
         ...(data.isArchived !== undefined
             ? { isArchived: data.isArchived }
             : {}),
-        ...(data.images !== undefined ? { images: data.images } : {}),
+        // ADD new images to existing images
+        ...(data.images !== undefined
+            ? {
+                images: [
+                    ...existingProduct.images,
+                    ...data.images,
+                ],
+            }
+            : {}),
     };
     return updateProduct({
         where: {

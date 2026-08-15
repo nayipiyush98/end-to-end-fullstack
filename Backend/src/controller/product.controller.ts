@@ -122,15 +122,22 @@ export async function updateProductController(
       });
       return;
     }
-    const files = req.files as Express.Multer.File[];
-
-    const imageUrls = files?.map((file) => `/images/${file.filename}`) ?? [];
+    const files = req.files as Express.Multer.File[] | undefined  ;
 
     const data = updateProductSchema.parse({
       ...req.body,
-      ...(files?.length > 0 && {
-        images: imageUrls,
-      }),
+      price: Number(req.body.price),
+      stock: Number(req.body.stock),
+      categoryId: Number(req.body.categoryId),
+
+      isArchived: req.body.isArchived === "true",
+      ...(files && files.length > 0
+        ? {
+            images: files.map(
+              (file) => `/images/${file.filename}`
+            ),
+          }
+        : {}),
     });
 
     const product = await updateProductService(productId, data);
@@ -169,7 +176,7 @@ export async function updateStockController(
 
     const product = await updateStockService(productId, stock);
 
-     res.status(200).json({
+    res.status(200).json({
       message: "Product stock updated successfully",
       data: product,
     });
@@ -185,9 +192,12 @@ export async function updateStockController(
   }
 }
 
-export async function deleteProductController(req:Request,res:Response):Promise<void>{
-    try {
-        const productId = Number(req.params.id);
+export async function deleteProductController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+    const productId = Number(req.params.id);
 
     if (Number.isNaN(productId)) {
       res.status(400).json({
@@ -202,21 +212,24 @@ export async function deleteProductController(req:Request,res:Response):Promise<
       message: "Product deleted successfully",
       data: product,
     });
-    } catch (error:unknown) {
-       console.error(error);
+  } catch (error: unknown) {
+    console.error(error);
 
     res.status(500).json({
       message:
         error instanceof Error
           ? error.message
           : "Something went wrong while updating product stock",
-    }); 
-    }
+    });
+  }
 }
 
-export async function addProductImagesController(req:Request,res:Response):Promise<void>{
-    try {
-        const productId = Number(req.params.id);
+export async function addProductImagesController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+    const productId = Number(req.params.id);
 
     if (Number.isNaN(productId)) {
       res.status(400).json({
@@ -234,21 +247,16 @@ export async function addProductImagesController(req:Request,res:Response):Promi
       return;
     }
 
-    const imageUrls = files.map(
-      (file) => `/images/${file.filename}`
-    );
+    const imageUrls = files.map((file) => `/images/${file.filename}`);
 
-    const product = await addProductImagesService(
-      productId,
-      imageUrls
-    );
+    const product = await addProductImagesService(productId, imageUrls);
 
     res.status(200).json({
       message: "Product images uploaded successfully",
       data: product,
     });
-    } catch (error:unknown) {
-         console.error(error);
+  } catch (error: unknown) {
+    console.error(error);
 
     res.status(500).json({
       message:
@@ -256,13 +264,10 @@ export async function addProductImagesController(req:Request,res:Response):Promi
           ? error.message
           : "Something went wrong while uploading product images",
     });
-    }
+  }
 }
 
-export const deleteProductsController = async (
-  req: Request,
-  res: Response
-) => {
+export const deleteProductsController = async (req: Request, res: Response) => {
   try {
     const { ids } = deleteProductsSchema.parse(req.body);
 

@@ -81,12 +81,17 @@ export async function updateProductController(req, res) {
             return;
         }
         const files = req.files;
-        const imageUrls = files?.map((file) => `/images/${file.filename}`) ?? [];
         const data = updateProductSchema.parse({
             ...req.body,
-            ...(files?.length > 0 && {
-                images: imageUrls,
-            }),
+            price: Number(req.body.price),
+            stock: Number(req.body.stock),
+            categoryId: Number(req.body.categoryId),
+            isArchived: req.body.isArchived === "true",
+            ...(files && files.length > 0
+                ? {
+                    images: files.map((file) => `/images/${file.filename}`),
+                }
+                : {}),
         });
         const product = await updateProductService(productId, data);
         res.status(200).json({

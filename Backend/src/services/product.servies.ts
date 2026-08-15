@@ -169,6 +169,17 @@ export async function updateProductService(
   id: number,
   data: UpdateProductInput
 ) {
+  const existingProduct = await prisma.product.findUnique({
+    where: { id },
+    select: {
+      images: true,
+    },
+  });
+
+  if (!existingProduct) {
+    throw new Error("Product not found");
+  }
+
   const updateData: Prisma.ProductUncheckedUpdateInput = {
     ...(data.name !== undefined ? { name: data.name } : {}),
     ...(data.description !== undefined
@@ -183,7 +194,16 @@ export async function updateProductService(
     ...(data.isArchived !== undefined
       ? { isArchived: data.isArchived }
       : {}),
-    ...(data.images !== undefined ? { images: data.images } : {}),
+
+    // ADD new images to existing images
+    ...(data.images !== undefined
+      ? {
+          images: [
+            ...existingProduct.images,
+            ...data.images,
+          ],
+        }
+      : {}),
   };
 
   return updateProduct({
