@@ -142,20 +142,13 @@ export async function updateProductService(id, data) {
             : {}),
         ...(data.price !== undefined ? { price: data.price } : {}),
         ...(data.stock !== undefined ? { stock: data.stock } : {}),
-        ...(data.categoryId !== undefined
-            ? { categoryId: data.categoryId }
-            : {}),
+        ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
         ...(data.sku !== undefined ? { sku: data.sku } : {}),
-        ...(data.isArchived !== undefined
-            ? { isArchived: data.isArchived }
-            : {}),
+        ...(data.isArchived !== undefined ? { isArchived: data.isArchived } : {}),
         // ADD new images to existing images
         ...(data.images !== undefined
             ? {
-                images: [
-                    ...existingProduct.images,
-                    ...data.images,
-                ],
+                images: [...existingProduct.images, ...data.images],
             }
             : {}),
     };
@@ -184,6 +177,26 @@ export const deleteProducts = async (ids) => {
         },
         data: {
             isArchived: true,
+        },
+    });
+};
+export const updateProductCategoryService = async (ids, categoryId) => {
+    const category = await prisma.category.findUnique({
+        where: {
+            id: categoryId,
+        },
+    });
+    if (!category) {
+        throw new Error("CATEGORY_NOT_FOUND");
+    }
+    return prisma.product.updateMany({
+        where: {
+            id: {
+                in: ids,
+            },
+        },
+        data: {
+            categoryId,
         },
     });
 };

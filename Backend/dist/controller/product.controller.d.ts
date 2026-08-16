@@ -7,4 +7,5 @@ export declare function updateStockController(req: Request, res: Response): Prom
 export declare function deleteProductController(req: Request, res: Response): Promise<void>;
 export declare function addProductImagesController(req: Request, res: Response): Promise<void>;
 export declare const deleteProductsController: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
+export declare function updateProductCategoryController(req: Request, res: Response): Promise<void>;
 //# sourceMappingURL=product.controller.d.ts.map

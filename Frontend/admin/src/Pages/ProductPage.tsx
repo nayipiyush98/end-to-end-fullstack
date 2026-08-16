@@ -7,6 +7,7 @@ import { DataTable } from "../components/product/data-table";
 import { columns } from "@/components/product/columns";
 import { useProductStore } from "@/store/product.store";
 import { Button } from "../components/ui/button";
+import { useCategoryStore } from "@/store/category.store";
 
 import { DeleteProductsDialog2 } from "@/components/product/DeleteProductsDialog2";
 import {
@@ -24,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UpdateStockDialog } from "@/components/product/UpdateStockDialog";
+import { UpdateCategoryDialog } from "@/components/product/updateCategoryDialog";
 
 export function Products() {
   const [statusFilter, setStatusFilter] = useState<
@@ -44,6 +46,9 @@ export function Products() {
   const fetchProducts = useProductStore((state) => state.fetchProducts);
   const deleteProducts = useProductStore((state) => state.deleteProducts);
   const updateStock = useProductStore((state) => state.updateStock);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+
+  const updateCategory = useProductStore((state) => state.updateCategory);
 
   const selectedCount = Object.keys(rowSelection).length;
   const selectedProductIds = Object.keys(rowSelection).map(Number);
@@ -96,6 +101,14 @@ export function Products() {
     ];
   };
 
+  const categories = useCategoryStore((state) => state.categories);
+
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -144,7 +157,7 @@ export function Products() {
       <DataTable
         columns={(
           sFilter: "all" | "active" | "archived",
-          onStatus: (value: "all" | "active" | "archived") => void
+          onStatus: (value: "all" | "active" | "archived") => void,
         ) => columns(sFilter, onStatus, sort, handleSortChange)}
         data={products}
         search={search}
@@ -194,7 +207,7 @@ export function Products() {
               setStockDialogOpen(true);
             }}
             onUpdateCategory={() => {
-              console.log("Update category:", rowSelection);
+              setCategoryDialogOpen(true);
             }}
           />
         </div>
@@ -206,6 +219,28 @@ export function Products() {
             await updateStock(selectedProductIds, stock);
 
             setRowSelection({});
+          }}
+        />
+        <UpdateCategoryDialog
+          open={categoryDialogOpen}
+          onOpenChange={setCategoryDialogOpen}
+          selectedCount={selectedCount}
+          categories={categories}
+          onConfirm={async (categoryId) => {
+            await updateCategory(selectedProductIds, categoryId);
+
+            setRowSelection({});
+            setCategoryDialogOpen(false);
+
+            await fetchProducts({
+              page,
+              limit,
+              search: debouncedSearch || undefined,
+              isArchived:
+                statusFilter === "all"
+                  ? undefined
+                  : statusFilter === "archived",
+            });
           }}
         />
         <DeleteProductsDialog2

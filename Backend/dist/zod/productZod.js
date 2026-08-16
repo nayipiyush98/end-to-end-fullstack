@@ -86,4 +86,8 @@ export const deleteProductsSchema = z.object({
         .array(z.number().int().positive())
         .min(1, "At least one product is required"),
 });
+export const updateProductCategorySchema = z.object({
+    ids: z.array(z.number().int().positive()).min(1),
+    categoryId: z.number().int().positive()
+});
 //# sourceMappingURL=productZod.js.map

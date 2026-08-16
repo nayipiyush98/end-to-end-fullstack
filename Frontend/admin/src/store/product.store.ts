@@ -7,6 +7,7 @@ import {
    updateProductStock,
   type Product,
   type Pagination,
+  updateProductsCategory,
 } from "@/api/product.api";
 
 interface ProductState {
@@ -27,6 +28,10 @@ interface ProductState {
       isArchived?: boolean;
   }) => Promise<void>;
 
+  updateCategory: (
+  ids: number[],
+  categoryId: number
+) => Promise<void>;
   
   deleteProduct: (id: number) => Promise<void>;
 
@@ -37,6 +42,7 @@ interface ProductState {
   stock: number
 ) => Promise<void>;
 }
+
 
 export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
@@ -174,6 +180,39 @@ export const useProductStore = create<ProductState>((set, get) => ({
         error instanceof Error
           ? error.message
           : "Failed to update stock",
+    });
+
+    throw error;
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
+
+updateCategory: async (ids, categoryId) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    await updateProductsCategory(ids, categoryId);
+
+    const pagination = get().pagination;
+
+    await get().fetchProducts({
+      page: pagination?.page ?? 1,
+      limit: pagination?.limit ?? 10,
+    });
+  } catch (error) {
+    console.error("UPDATE CATEGORY ERROR:", error);
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to update category",
     });
 
     throw error;

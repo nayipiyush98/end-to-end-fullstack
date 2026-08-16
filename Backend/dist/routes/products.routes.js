@@ -1,5 +1,5 @@
 import Express from "express";
-import { getProductByIdController, getProductsController, createProductController, updateProductController, updateStockController, deleteProductController, addProductImagesController, deleteProductsController } from "../controller/product.controller.js";
+import { getProductByIdController, getProductsController, createProductController, updateProductController, updateStockController, deleteProductController, addProductImagesController, deleteProductsController, updateProductCategoryController } from "../controller/product.controller.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { authorize } from "../middleware/authorize.js";
 import { uploadProductImages } from "../services/upload.service.js";
@@ -11,6 +11,7 @@ productRoutes.patch("/products/:id/stock", adminAuth, authorize("update_stock"),
 productRoutes.delete("/products/:id", adminAuth, authorize("delete_product"), deleteProductController);
 productRoutes.delete("/products/", adminAuth, authorize("delete_product"), deleteProductsController);
 productRoutes.post("/products/:id/images", adminAuth, authorize("update_product"), uploadProductImages.array("images", 5), addProductImagesController);
+productRoutes.patch("/products/category", adminAuth, authorize("update_category"), updateProductCategoryController);
 /** * User Routes */
 productRoutes.get("/products", getProductsController);
 productRoutes.get("/products/:id", getProductByIdController);

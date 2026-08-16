@@ -7,7 +7,8 @@ import {
   updateStockController,
   deleteProductController,
   addProductImagesController,
-  deleteProductsController
+  deleteProductsController,
+  updateProductCategoryController
 } from "../controller/product.controller.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { authorize } from "../middleware/authorize.js";
@@ -54,6 +55,12 @@ productRoutes.post(
   authorize("update_product"),
   uploadProductImages.array("images", 5),
   addProductImagesController,
+);
+productRoutes.patch(
+  "/products/category",
+  adminAuth,
+  authorize("update_category"),
+  updateProductCategoryController
 );
 /** * User Routes */
 

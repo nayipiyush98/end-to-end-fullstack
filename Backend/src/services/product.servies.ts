@@ -23,9 +23,8 @@ export async function getProducts(query: ProductQuery) {
 
   const where: Prisma.ProductWhereInput = {
     ...(query.isArchived !== undefined && {
-    isArchived: query.isArchived,
-  }),
-
+      isArchived: query.isArchived,
+    }),
 
     ...(search && {
       OR: [
@@ -164,10 +163,9 @@ export async function createProductService(data: CreateProductData) {
   return product;
 }
 
-
 export async function updateProductService(
   id: number,
-  data: UpdateProductInput
+  data: UpdateProductInput,
 ) {
   const existingProduct = await prisma.product.findUnique({
     where: { id },
@@ -187,21 +185,14 @@ export async function updateProductService(
       : {}),
     ...(data.price !== undefined ? { price: data.price } : {}),
     ...(data.stock !== undefined ? { stock: data.stock } : {}),
-    ...(data.categoryId !== undefined
-      ? { categoryId: data.categoryId }
-      : {}),
+    ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
     ...(data.sku !== undefined ? { sku: data.sku } : {}),
-    ...(data.isArchived !== undefined
-      ? { isArchived: data.isArchived }
-      : {}),
+    ...(data.isArchived !== undefined ? { isArchived: data.isArchived } : {}),
 
     // ADD new images to existing images
     ...(data.images !== undefined
       ? {
-          images: [
-            ...existingProduct.images,
-            ...data.images,
-          ],
+          images: [...existingProduct.images, ...data.images],
         }
       : {}),
   };
@@ -214,21 +205,15 @@ export async function updateProductService(
   });
 }
 
-export async function updateStockService(
-  id: number,
-  stock: number
-) {
+export async function updateStockService(id: number, stock: number) {
   return updateProductStock(id, stock);
 }
 
-export async function deleteProductService(id:number){
-    return archiveProduct(id)
+export async function deleteProductService(id: number) {
+  return archiveProduct(id);
 }
 
-export async function addProductImagesService(
-  id: number,
-  imageUrls: string[]
-) {
+export async function addProductImagesService(id: number, imageUrls: string[]) {
   return addProductImages(id, imageUrls);
 }
 
@@ -241,6 +226,32 @@ export const deleteProducts = async (ids: number[]) => {
     },
     data: {
       isArchived: true,
+    },
+  });
+};
+
+export const updateProductCategoryService = async (
+  ids: number[],
+  categoryId: number,
+) => {
+  const category = await prisma.category.findUnique({
+    where: {
+      id: categoryId,
+    },
+  });
+
+  if(!category){
+     throw new Error("CATEGORY_NOT_FOUND");
+  }
+
+   return prisma.product.updateMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+    data: {
+      categoryId,
     },
   });
 };

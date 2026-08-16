@@ -5,6 +5,7 @@ import {
   updateProductSchema,
   updateStockSchema,
   deleteProductsSchema,
+  updateProductCategorySchema,
 } from "../zod/productZod.js";
 import {
   getProducts,
@@ -15,6 +16,7 @@ import {
   deleteProductService,
   addProductImagesService,
   deleteProducts,
+  updateProductCategoryService
 } from "../services/product.servies.js";
 
 export async function getProductsController(
@@ -287,3 +289,27 @@ export const deleteProductsController = async (req: Request, res: Response) => {
     });
   }
 };
+
+export async function updateProductCategoryController(req: Request, res: Response):Promise<void>{
+  try{
+    const {ids,categoryId} = updateProductCategorySchema.parse(req.body)
+
+    const result = await updateProductCategoryService(ids,categoryId)
+
+    res.status(200).json({
+      success: true,
+      message: "Products category updated successfully",
+      count: result.count
+       });
+  }catch(error){
+     console.error("UPDATE PRODUCTS CATEGORY ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to update products category",
+    });
+  }
+}

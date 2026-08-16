@@ -19,6 +19,7 @@ import { Account } from "@/Pages/AccountPage";
 import { Appearance } from "@/Pages/AppearancePage";
 import { Notifications } from "@/Pages/NotificationsPage";
 import { Display } from "@/Pages/DisplayPage";
+import { AddEditCategory } from "@/Pages/AddEditCategoryPage";
 
 function AppRouter() {
   const ADMIN_URL = "/admin";
@@ -49,6 +50,14 @@ function AppRouter() {
           <Route
             path={`${ADMIN_URL}/products/edit/:id`}
             element={<AddEditProductPage />}
+          />
+          <Route
+            path={`${ADMIN_URL}/categories/create`}
+            element={<AddEditCategory />}
+          />
+          <Route
+            path={`${ADMIN_URL}/categories/edit/:id`}
+            element={<AddEditCategory />}
           />
           <Route path={`${ADMIN_URL}/orders`} element={<Orders />} />
           <Route path={`${ADMIN_URL}/categories`} element={<Categories />} />

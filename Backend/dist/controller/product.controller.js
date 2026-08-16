@@ -1,6 +1,6 @@
 import { response } from "express";
-import { productQuerySchema, createProductSchema, updateProductSchema, updateStockSchema, deleteProductsSchema, } from "../zod/productZod.js";
-import { getProducts, getProductById, createProductService, updateProductService, updateStockService, deleteProductService, addProductImagesService, deleteProducts, } from "../services/product.servies.js";
+import { productQuerySchema, createProductSchema, updateProductSchema, updateStockSchema, deleteProductsSchema, updateProductCategorySchema, } from "../zod/productZod.js";
+import { getProducts, getProductById, createProductService, updateProductService, updateStockService, deleteProductService, addProductImagesService, deleteProducts, updateProductCategoryService } from "../services/product.servies.js";
 export async function getProductsController(req, res) {
     try {
         const query = productQuerySchema.parse(req.query);
@@ -207,4 +207,24 @@ export const deleteProductsController = async (req, res) => {
         });
     }
 };
+export async function updateProductCategoryController(req, res) {
+    try {
+        const { ids, categoryId } = updateProductCategorySchema.parse(req.body);
+        const result = await updateProductCategoryService(ids, categoryId);
+        res.status(200).json({
+            success: true,
+            message: "Products category updated successfully",
+            count: result.count
+        });
+    }
+    catch (error) {
+        console.error("UPDATE PRODUCTS CATEGORY ERROR:", error);
+        res.status(500).json({
+            success: false,
+            message: error instanceof Error
+                ? error.message
+                : "Failed to update products category",
+        });
+    }
+}
 //# sourceMappingURL=product.controller.js.map

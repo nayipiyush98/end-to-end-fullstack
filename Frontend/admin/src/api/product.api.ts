@@ -40,6 +40,18 @@ export async function getProductById(
   return productSchema.parse(response.data);
 }
 
+export const updateProductsCategory = async (
+  ids: number[],
+  categoryId: number
+) => {
+  const response = await api.patch("/products/category", {
+    ids,
+    categoryId,
+  });
+
+  return response;
+};
+
 
 export async function createProduct(
   data: FormData

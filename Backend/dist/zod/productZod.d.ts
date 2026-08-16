@@ -46,4 +46,8 @@ export type UpdateStockInput = z.infer<typeof updateStockSchema>;
 export declare const deleteProductsSchema: z.ZodObject<{
     ids: z.ZodArray<z.ZodNumber>;
 }, z.core.$strip>;
+export declare const updateProductCategorySchema: z.ZodObject<{
+    ids: z.ZodArray<z.ZodNumber>;
+    categoryId: z.ZodNumber;
+}, z.core.$strip>;
 //# sourceMappingURL=productZod.d.ts.map

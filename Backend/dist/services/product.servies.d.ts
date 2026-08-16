@@ -102,4 +102,5 @@ export declare function addProductImagesService(id: number, imageUrls: string[])
     updatedAt: Date;
 }>;
 export declare const deleteProducts: (ids: number[]) => Promise<Prisma.BatchPayload>;
+export declare const updateProductCategoryService: (ids: number[], categoryId: number) => Promise<Prisma.BatchPayload>;
 //# sourceMappingURL=product.servies.d.ts.map
