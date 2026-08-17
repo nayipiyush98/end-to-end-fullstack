@@ -36,13 +36,6 @@ export function Categories() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-6 text-red-500">
-        {error}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

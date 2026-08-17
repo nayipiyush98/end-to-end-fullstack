@@ -50,7 +50,7 @@ export async function deleteCategoryService(id) {
         throw new Error("CATEGORY_NOT_FOUND");
     }
     if (category._count.products > 0) {
-        throw new Error("CATEGORY_HAS_PRODUCTS");
+        throw new Error(`Cannot delete category. It has ${category._count.products} attached product(s).`);
     }
     return deleteCategory({
         where: {

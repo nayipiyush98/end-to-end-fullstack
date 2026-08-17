@@ -69,22 +69,24 @@ export async function deleteCategoryController(req, res) {
     }
     catch (error) {
         console.log("Delete Category error:", error);
-        if (error instanceof Error && error.message === "CATEGORY_HAS_PRODUCTS") {
-            res.status(409).json({
-                message: "Cannot delete this category because products are assigned to it.",
-            });
-            return;
-        }
-        if (error instanceof Error &&
-            error.message === "CATEGORY_NOT_FOUND") {
-            res.status(404).json({
-                message: "Category not found",
-            });
-            return;
+        if (error instanceof Error) {
+            if (error.message.includes("attached product")) {
+                res.status(409).json({
+                    message: error.message,
+                });
+                return;
+            }
+            if (error.message === "Category not found") {
+                res.status(404).json({
+                    message: error.message,
+                });
+                return;
+            }
         }
         res.status(500).json({
             message: "Failed to delete category",
         });
+        return;
     }
 }
 //# sourceMappingURL=categories.controller.js.map
