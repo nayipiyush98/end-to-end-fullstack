@@ -22,3 +22,28 @@ export const createOrderSchema = z.object({
 export type CreateOrderInput = z.infer<
   typeof createOrderSchema
 >;
+
+
+
+export const getOrdersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(10),
+
+  status: z.string().optional(),
+
+  userId: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional(),
+});
+
+export type GetOrdersQuery = z.infer<
+  typeof getOrdersQuerySchema
+>;

@@ -74,7 +74,9 @@ export const ModelName = {
     Permission: 'Permission',
     RolePermission: 'RolePermission',
     Product: 'Product',
-    Category: 'Category'
+    Category: 'Category',
+    Order: 'Order',
+    OrderItem: 'OrderItem'
 };
 /**
  * Enums
@@ -131,6 +133,23 @@ export const CategoryScalarFieldEnum = {
     name: 'name',
     slug: 'slug',
     parentId: 'parentId'
+};
+export const OrderScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    total: 'total',
+    shippingAddress: 'shippingAddress',
+    paymentMethod: 'paymentMethod',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const OrderItemScalarFieldEnum = {
+    id: 'id',
+    orderId: 'orderId',
+    productId: 'productId',
+    qty: 'qty',
+    price: 'price'
 };
 export const SortOrder = {
     asc: 'asc',
