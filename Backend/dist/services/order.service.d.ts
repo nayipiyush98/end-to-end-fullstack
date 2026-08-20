@@ -1,4 +1,4 @@
-import type { CreateOrderInput, GetOrdersQuery } from "../zod/orderZod.js";
+import type { CancelOrderInput, CreateOrderInput, GetOrdersQuery, UpdateOrderStatusInput } from "../zod/orderZod.js";
 export declare function createOrderService(userId: number, data: CreateOrderInput): Promise<{
     items: ({
         product: {
@@ -21,6 +21,12 @@ export declare function createOrderService(userId: number, data: CreateOrderInpu
         qty: number;
         price: import("@prisma/client-runtime-utils").Decimal;
     })[];
+    statusHistory: {
+        id: number;
+        orderId: number;
+        status: string;
+        createdAt: Date;
+    }[];
 } & {
     id: number;
     userId: number;
@@ -28,6 +34,8 @@ export declare function createOrderService(userId: number, data: CreateOrderInpu
     shippingAddress: string;
     paymentMethod: string;
     status: string;
+    cancelReason: string | null;
+    cancelledAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
 }>;
@@ -59,6 +67,8 @@ export declare function getOrdersService(authId: number, AuthType: "CUSTOMER" | 
         shippingAddress: string;
         paymentMethod: string;
         status: string;
+        cancelReason: string | null;
+        cancelledAt: Date | null;
         createdAt: Date;
         updatedAt: Date;
     })[];
@@ -68,5 +78,68 @@ export declare function getOrdersService(authId: number, AuthType: "CUSTOMER" | 
         total: number;
         totalPages: number;
     };
+}>;
+export declare function getOrderByIdService(orderId: number, authId: number, authType: "ADMIN" | "CUSTOMER"): Promise<{
+    items: ({
+        product: {
+            id: number;
+            images: string[];
+            name: string;
+            price: import("@prisma/client-runtime-utils").Decimal;
+            sku: string;
+        };
+    } & {
+        id: number;
+        orderId: number;
+        productId: number;
+        qty: number;
+        price: import("@prisma/client-runtime-utils").Decimal;
+    })[];
+    statusHistory: {
+        id: number;
+        orderId: number;
+        status: string;
+        createdAt: Date;
+    }[];
+    user: {
+        email: string;
+        id: number;
+        name: string;
+    };
+} & {
+    id: number;
+    userId: number;
+    total: import("@prisma/client-runtime-utils").Decimal;
+    shippingAddress: string;
+    paymentMethod: string;
+    status: string;
+    cancelReason: string | null;
+    cancelledAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function updateOrderStatusService(orderId: number, data: UpdateOrderStatusInput): Promise<{
+    id: number;
+    userId: number;
+    total: import("@prisma/client-runtime-utils").Decimal;
+    shippingAddress: string;
+    paymentMethod: string;
+    status: string;
+    cancelReason: string | null;
+    cancelledAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function cancelOrderService(orderId: number, authId: number, authType: "ADMIN" | "CUSTOMER", data: CancelOrderInput): Promise<{
+    id: number;
+    userId: number;
+    total: import("@prisma/client-runtime-utils").Decimal;
+    shippingAddress: string;
+    paymentMethod: string;
+    status: string;
+    cancelReason: string | null;
+    cancelledAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
 }>;
 //# sourceMappingURL=order.service.d.ts.map

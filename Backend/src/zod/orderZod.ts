@@ -47,3 +47,31 @@ export const getOrdersQuerySchema = z.object({
 export type GetOrdersQuery = z.infer<
   typeof getOrdersQuerySchema
 >;
+
+
+export const updateOrderStatusSchema = z.object({
+  status: z.enum([
+    "PENDING",
+    "SHIPPED",
+    "DELIVERED",
+    "CANCELLED",
+  ]),
+});
+
+export type UpdateOrderStatusInput = z.infer<
+  typeof updateOrderStatusSchema
+>;
+
+export const cancelOrderSchema = z.object({
+  reason: z
+    .string()
+    .trim()
+    .min(3, "Cancellation reason must be at least 3 characters")
+    .max(500, "Cancellation reason is too long"),
+});
+
+export type CancelOrderInput = z.infer<
+  typeof cancelOrderSchema
+>;     
+
+

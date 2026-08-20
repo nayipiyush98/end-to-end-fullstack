@@ -35,6 +35,7 @@ export declare const ModelName: {
     readonly Category: 'Category';
     readonly Order: 'Order';
     readonly OrderItem: 'OrderItem';
+    readonly OrderStatusHistory: 'OrderStatusHistory';
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -105,6 +106,8 @@ export declare const OrderScalarFieldEnum: {
     readonly shippingAddress: 'shippingAddress';
     readonly paymentMethod: 'paymentMethod';
     readonly status: 'status';
+    readonly cancelReason: 'cancelReason';
+    readonly cancelledAt: 'cancelledAt';
     readonly createdAt: 'createdAt';
     readonly updatedAt: 'updatedAt';
 };
@@ -117,6 +120,13 @@ export declare const OrderItemScalarFieldEnum: {
     readonly price: 'price';
 };
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum];
+export declare const OrderStatusHistoryScalarFieldEnum: {
+    readonly id: 'id';
+    readonly orderId: 'orderId';
+    readonly status: 'status';
+    readonly createdAt: 'createdAt';
+};
+export type OrderStatusHistoryScalarFieldEnum = (typeof OrderStatusHistoryScalarFieldEnum)[keyof typeof OrderStatusHistoryScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: 'asc';
     readonly desc: 'desc';

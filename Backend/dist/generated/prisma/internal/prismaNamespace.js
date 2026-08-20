@@ -76,7 +76,8 @@ export const ModelName = {
     Product: 'Product',
     Category: 'Category',
     Order: 'Order',
-    OrderItem: 'OrderItem'
+    OrderItem: 'OrderItem',
+    OrderStatusHistory: 'OrderStatusHistory'
 };
 /**
  * Enums
@@ -141,6 +142,8 @@ export const OrderScalarFieldEnum = {
     shippingAddress: 'shippingAddress',
     paymentMethod: 'paymentMethod',
     status: 'status',
+    cancelReason: 'cancelReason',
+    cancelledAt: 'cancelledAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
@@ -150,6 +153,12 @@ export const OrderItemScalarFieldEnum = {
     productId: 'productId',
     qty: 'qty',
     price: 'price'
+};
+export const OrderStatusHistoryScalarFieldEnum = {
+    id: 'id',
+    orderId: 'orderId',
+    status: 'status',
+    createdAt: 'createdAt'
 };
 export const SortOrder = {
     asc: 'asc',

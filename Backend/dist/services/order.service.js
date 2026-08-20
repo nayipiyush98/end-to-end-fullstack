@@ -1,21 +1,19 @@
+import { NEVER } from "zod";
 import { prisma } from "../config/db.js";
 export async function createOrderService(userId, data) {
     const productIds = data.items.map((item) => item.productId);
     const products = await prisma.product.findMany({
         where: {
             id: {
-                in: productIds
+                in: productIds,
             },
             isArchived: false,
-        }
+        },
     });
     if (products.length !== productIds.length) {
         throw new Error("One or more products are unavailable.");
     }
-    const productMap = new Map(products.map((product) => [
-        product.id,
-        product,
-    ]));
+    const productMap = new Map(products.map((product) => [product.id, product]));
     let total = 0;
     const orderItems = data.items.map((item) => {
         const product = productMap.get(item.productId);
@@ -43,11 +41,21 @@ export async function createOrderService(userId, data) {
                 items: {
                     create: orderItems,
                 },
+                statusHistory: {
+                    create: {
+                        status: "PENDING",
+                    },
+                },
             },
             include: {
                 items: {
                     include: {
                         product: true,
+                    },
+                },
+                statusHistory: {
+                    orderBy: {
+                        createdAt: "asc",
                     },
                 },
             },
@@ -69,7 +77,7 @@ export async function createOrderService(userId, data) {
     return order;
 }
 export async function getOrdersService(authId, AuthType, query) {
-    const { page, limit, status, userId, } = query;
+    const { page, limit, status, userId } = query;
     const skip = (page - 1) * limit;
     const where = {};
     if (AuthType === "CUSTOMER") {
@@ -78,7 +86,6 @@ export async function getOrdersService(authId, AuthType, query) {
     if (AuthType === "ADMIN" && userId) {
         where.userId = userId;
     }
-    // Status filter
     if (status) {
         where.status = status;
     }
@@ -125,5 +132,118 @@ export async function getOrdersService(authId, AuthType, query) {
             totalPages: Math.ceil(total / limit),
         },
     };
+}
+export async function getOrderByIdService(orderId, authId, authType) {
+    const where = {
+        id: orderId,
+    };
+    // Customer can only access their own order
+    if (authType === "CUSTOMER") {
+        where.userId = authId;
+    }
+    const order = await prisma.order.findFirst({
+        where,
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+            items: {
+                include: {
+                    product: {
+                        select: {
+                            id: true,
+                            name: true,
+                            sku: true,
+                            price: true,
+                            images: true,
+                        },
+                    },
+                },
+            },
+            statusHistory: {
+                orderBy: {
+                    createdAt: "asc",
+                },
+            },
+        },
+    });
+    if (!order) {
+        throw new Error("Order not found");
+    }
+    return order;
+}
+export async function updateOrderStatusService(orderId, data) {
+    const order = await prisma.order.findUnique({
+        where: {
+            id: orderId,
+        },
+    });
+    if (!order) {
+        throw new Error("Order not found");
+    }
+    if (order.status === data.status) {
+        throw new Error(`Order is already ${data.status}`);
+    }
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+        const updated = await tx.order.update({
+            where: {
+                id: orderId,
+            },
+            data: {
+                status: data.status,
+            },
+        });
+        await tx.orderStatusHistory.create({
+            data: {
+                orderId: orderId,
+                status: data.status,
+            },
+        });
+        return updated;
+    });
+    return updatedOrder;
+}
+export async function cancelOrderService(orderId, authId, authType, data) {
+    const order = await prisma.order.findUnique({
+        where: {
+            id: orderId
+        }
+    });
+    if (!order) {
+        throw new Error("order not found");
+    }
+    if (authType === "CUSTOMER" && order.userId !== authId) {
+        throw new Error("order not found");
+    }
+    if (order.status === "CANCELLED") {
+        throw new Error("order is already cancelled");
+    }
+    if (authType === "CUSTOMER" && order.status !== "PENDING") {
+        throw new Error("Customer can only cancel an order before it is shipped");
+    }
+    const cancelOrder = await prisma.$transaction(async (tx) => {
+        const updateOrder = await tx.order.update({
+            where: {
+                id: orderId
+            },
+            data: {
+                status: "CANCELLED",
+                cancelReason: data.reason,
+                cancelledAt: new Date()
+            }
+        });
+        await tx.orderStatusHistory.create({
+            data: {
+                orderId,
+                status: "CANCELLED"
+            }
+        });
+        return updateOrder;
+    });
+    return cancelOrder;
 }
 //# sourceMappingURL=order.service.js.map

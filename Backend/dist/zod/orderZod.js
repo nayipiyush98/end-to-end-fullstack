@@ -28,4 +28,19 @@ export const getOrdersQuerySchema = z.object({
         .positive()
         .optional(),
 });
+export const updateOrderStatusSchema = z.object({
+    status: z.enum([
+        "PENDING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED",
+    ]),
+});
+export const cancelOrderSchema = z.object({
+    reason: z
+        .string()
+        .trim()
+        .min(3, "Cancellation reason must be at least 3 characters")
+        .max(500, "Cancellation reason is too long"),
+});
 //# sourceMappingURL=orderZod.js.map

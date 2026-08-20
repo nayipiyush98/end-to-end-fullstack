@@ -216,6 +216,17 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get orderItem(): Prisma.OrderItemDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    /**
+     * `prisma.orderStatusHistory`: Exposes CRUD operations for the **OrderStatusHistory** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more OrderStatusHistories
+      * const orderStatusHistories = await prisma.orderStatusHistory.findMany()
+      * ```
+      */
+    get orderStatusHistory(): Prisma.OrderStatusHistoryDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
 }
 export declare function getPrismaClientClass(): PrismaClientConstructor;
 //# sourceMappingURL=class.d.ts.map
