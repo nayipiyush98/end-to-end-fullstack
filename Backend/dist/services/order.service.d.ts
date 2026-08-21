@@ -142,4 +142,35 @@ export declare function cancelOrderService(orderId: number, authId: number, auth
     createdAt: Date;
     updatedAt: Date;
 }>;
+export declare function getInvoiceService(orderId: number, authId: number, authType: "ADMIN" | "CUSTOMER"): Promise<{
+    items: ({
+        product: {
+            id: number;
+            name: string;
+            sku: string;
+        };
+    } & {
+        id: number;
+        orderId: number;
+        productId: number;
+        qty: number;
+        price: import("@prisma/client-runtime-utils").Decimal;
+    })[];
+    user: {
+        email: string;
+        id: number;
+        name: string;
+    };
+} & {
+    id: number;
+    userId: number;
+    total: import("@prisma/client-runtime-utils").Decimal;
+    shippingAddress: string;
+    paymentMethod: string;
+    status: string;
+    cancelReason: string | null;
+    cancelledAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
 //# sourceMappingURL=order.service.d.ts.map

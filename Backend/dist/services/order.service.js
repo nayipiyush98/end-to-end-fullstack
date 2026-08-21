@@ -246,4 +246,39 @@ export async function cancelOrderService(orderId, authId, authType, data) {
     });
     return cancelOrder;
 }
+export async function getInvoiceService(orderId, authId, authType) {
+    const where = {
+        id: orderId
+    };
+    if (authType === "CUSTOMER") {
+        where.userId = authId;
+    }
+    const order = await prisma.order.findFirst({
+        where,
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true
+                }
+            },
+            items: {
+                include: {
+                    product: {
+                        select: {
+                            id: true,
+                            name: true,
+                            sku: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+    if (!order) {
+        throw new Error("order not found");
+    }
+    return order;
+}
 //# sourceMappingURL=order.service.js.map

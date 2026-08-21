@@ -1,6 +1,6 @@
-import { required } from "zod/mini";
-import { cancelOrderService, createOrderService, getOrderByIdService, getOrdersService, updateOrderStatusService } from "../services/order.service.js";
-import { cancelOrderSchema, createOrderSchema, getOrdersQuerySchema, updateOrderStatusSchema } from "../zod/orderZod.js";
+import PDFDocument from "pdfkit";
+import { cancelOrderService, createOrderService, getOrderByIdService, getOrdersService, updateOrderStatusService, getInvoiceService, } from "../services/order.service.js";
+import { cancelOrderSchema, createOrderSchema, getOrdersQuerySchema, updateOrderStatusSchema, } from "../zod/orderZod.js";
 export async function createOrderController(req, res) {
     try {
         if (!req.user) {
@@ -86,8 +86,7 @@ export async function getOrderByIdController(req, res) {
     }
     catch (error) {
         console.error("GET ORDER ERROR:", error);
-        if (error instanceof Error &&
-            error.message === "Order not found") {
+        if (error instanceof Error && error.message === "Order not found") {
             res.status(404).json({
                 message: "Order not found",
             });
@@ -157,14 +156,14 @@ export async function cancelOrderController(req, res) {
     try {
         if (!req.auth) {
             res.status(401).json({
-                message: "Authentication required"
+                message: "Authentication required",
             });
             return;
         }
         const orderId = Number(req.params.id);
         if (!Number.isInteger(orderId) || orderId <= 0) {
             res.status(400).json({
-                message: "orderId is invalid"
+                message: "orderId is invalid",
             });
             return;
         }
@@ -172,7 +171,7 @@ export async function cancelOrderController(req, res) {
         const order = await cancelOrderService(orderId, req.auth.id, req.auth.type, data);
         res.status(200).json({
             message: "order cancelled successfully",
-            data: order
+            data: order,
         });
     }
     catch (error) {
@@ -184,8 +183,7 @@ export async function cancelOrderController(req, res) {
                 });
                 return;
             }
-            if (error.message ===
-                "Order is already cancelled") {
+            if (error.message === "Order is already cancelled") {
                 res.status(409).json({
                     message: error.message,
                 });
@@ -205,6 +203,96 @@ export async function cancelOrderController(req, res) {
         res.status(500).json({
             message: "Failed to cancel order",
         });
+    }
+}
+export async function getInvoiceController(req, res) {
+    try {
+        if (!req.auth) {
+            res.status(401).json({
+                message: "Authentication is required",
+            });
+            return;
+        }
+        const orderId = Number(req.params.id);
+        if (!Number.isInteger(orderId) || orderId <= 0) {
+            res.status(400).json({
+                message: "Invalid order ID",
+            });
+            return;
+        }
+        const order = await getInvoiceService(orderId, req.auth.id, req.auth.type);
+        const doc = new PDFDocument({
+            margin: 50,
+        });
+        res.setHeader("content-Type", "application/pdf");
+        res.setHeader("content-Disposition", `inline; filename="invoice-${order.id}.pdf`);
+        doc.pipe(res);
+        doc.fontSize(22).text("StoreFront", {
+            align: "center",
+        });
+        doc.moveDown();
+        doc.fontSize(11);
+        doc.text(`Invoice #: INV-${String(order.id).padStart(6, "0")}`);
+        doc.text(`Order #: ${order.id}`);
+        doc.text(`Date: ${order.createdAt.toLocaleDateString()}`);
+        doc.moveDown();
+        doc.fontSize(14).text("Customer");
+        doc
+            .fontSize(11)
+            .text(`Name: ${order.user.name}`)
+            .text(`Email: ${order.user.email}`);
+        doc.moveDown();
+        doc.fontSize(14).text(`Shipping Address`);
+        doc.fontSize(11).text(order.shippingAddress);
+        doc.moveDown();
+        doc.fontSize(14).text("Payment");
+        doc
+            .fontSize(11)
+            .text(`Method: ${order.paymentMethod}`)
+            .text(`Status: ${order.status}`);
+        doc.moveDown();
+        doc.fontSize(14).text(`Items`);
+        doc.moveDown();
+        let calculatedTotal = 0;
+        for (const item of order.items) {
+            const price = Number(item.price);
+            const itemTotal = price * item.qty;
+            calculatedTotal += itemTotal;
+            doc
+                .fontSize(11)
+                .text(`${item.product.name} | Qty: ${item.qty} | ` +
+                `₹${price.toFixed(2)} | ` +
+                `₹${itemTotal.toFixed(2)}`);
+            doc.moveDown(0.5);
+        }
+        doc.moveDown();
+        doc
+            .fontSize(16)
+            .text(`Total: ₹${calculatedTotal.toFixed(2)}`, {
+            align: "right",
+        });
+        doc.moveDown();
+        doc
+            .fontSize(10)
+            .text("Thank you for shopping with us!", {
+            align: "center",
+        });
+        doc.end();
+    }
+    catch (error) {
+        console.error("GET INVOICE ERROR:", error);
+        if (error instanceof Error &&
+            error.message === "Order not found") {
+            res.status(404).json({
+                message: "Order not found",
+            });
+            return;
+        }
+        if (!res.headersSent) {
+            res.status(500).json({
+                message: "Failed to generate invoice",
+            });
+        }
     }
 }
 //# sourceMappingURL=orders.controller.js.map

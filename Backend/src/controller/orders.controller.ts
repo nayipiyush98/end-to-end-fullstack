@@ -1,6 +1,18 @@
-import { required } from "zod/mini";
-import { cancelOrderService, createOrderService, getOrderByIdService, getOrdersService, updateOrderStatusService } from "../services/order.service.js";
-import { cancelOrderSchema, createOrderSchema, getOrdersQuerySchema, updateOrderStatusSchema } from "../zod/orderZod.js";
+import PDFDocument from "pdfkit";
+import {
+  cancelOrderService,
+  createOrderService,
+  getOrderByIdService,
+  getOrdersService,
+  updateOrderStatusService,
+  getInvoiceService,
+} from "../services/order.service.js";
+import {
+  cancelOrderSchema,
+  createOrderSchema,
+  getOrdersQuerySchema,
+  updateOrderStatusSchema,
+} from "../zod/orderZod.js";
 import type { Request, Response } from "express";
 
 export async function createOrderController(
@@ -48,24 +60,19 @@ export async function createOrderController(
 
 export async function getOrdersController(
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> {
   try {
-     if (!req.auth) {
+    if (!req.auth) {
       res.status(401).json({
         message: "Authentication required",
       });
       return;
     }
 
-
     const query = getOrdersQuerySchema.parse(req.query);
 
-     const result = await getOrdersService(
-      req.auth.id,
-      req.auth.type,
-      query
-    );
+    const result = await getOrdersService(req.auth.id, req.auth.type, query);
 
     res.status(200).json({
       message: "Orders fetched successfully",
@@ -90,10 +97,9 @@ export async function getOrdersController(
   }
 }
 
-
 export async function getOrderByIdController(
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> {
   try {
     if (!req.auth) {
@@ -115,7 +121,7 @@ export async function getOrderByIdController(
     const order = await getOrderByIdService(
       orderId,
       req.auth.id,
-      req.auth.type
+      req.auth.type,
     );
 
     res.status(200).json({
@@ -127,10 +133,7 @@ export async function getOrderByIdController(
   } catch (error) {
     console.error("GET ORDER ERROR:", error);
 
-    if (
-      error instanceof Error &&
-      error.message === "Order not found"
-    ) {
+    if (error instanceof Error && error.message === "Order not found") {
       res.status(404).json({
         message: "Order not found",
       });
@@ -145,8 +148,11 @@ export async function getOrderByIdController(
   }
 }
 
-export async function updateOrderStatusController(req:Request,res:Response):Promise<void>{
-   try {
+export async function updateOrderStatusController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
     if (!req.auth) {
       res.status(401).json({
         message: "Authentication required",
@@ -170,14 +176,9 @@ export async function updateOrderStatusController(req:Request,res:Response):Prom
       return;
     }
 
-    const data = updateOrderStatusSchema.parse(
-      req.body
-    );
+    const data = updateOrderStatusSchema.parse(req.body);
 
-    const order = await updateOrderStatusService(
-      orderId,
-      data
-    );
+    const order = await updateOrderStatusService(orderId, data);
 
     res.status(200).json({
       message: "Order status updated successfully",
@@ -186,10 +187,7 @@ export async function updateOrderStatusController(req:Request,res:Response):Prom
 
     return;
   } catch (error) {
-    console.error(
-      "UPDATE ORDER STATUS ERROR:",
-      error
-    );
+    console.error("UPDATE ORDER STATUS ERROR:", error);
 
     if (error instanceof Error) {
       if (error.message === "Order not found") {
@@ -199,11 +197,7 @@ export async function updateOrderStatusController(req:Request,res:Response):Prom
         return;
       }
 
-      if (
-        error.message.startsWith(
-          "Order is already"
-        )
-      ) {
+      if (error.message.startsWith("Order is already")) {
         res.status(409).json({
           message: error.message,
         });
@@ -222,35 +216,42 @@ export async function updateOrderStatusController(req:Request,res:Response):Prom
   }
 }
 
-
-export async function cancelOrderController(req:Request,res:Response):Promise<void>{
+export async function cancelOrderController(
+  req: Request,
+  res: Response,
+): Promise<void> {
   try {
-    if(!req.auth){
+    if (!req.auth) {
       res.status(401).json({
-        message:"Authentication required"
-      })
-      return ;
+        message: "Authentication required",
+      });
+      return;
     }
 
     const orderId = Number(req.params.id);
 
-    if(!Number.isInteger(orderId) || orderId <= 0){
+    if (!Number.isInteger(orderId) || orderId <= 0) {
       res.status(400).json({
-        message:"orderId is invalid"
-      })
-      return 
+        message: "orderId is invalid",
+      });
+      return;
     }
 
-    const data = cancelOrderSchema.parse(req.body)
+    const data = cancelOrderSchema.parse(req.body);
 
-    const order =await cancelOrderService(orderId,req.auth.id,req.auth.type,data)
+    const order = await cancelOrderService(
+      orderId,
+      req.auth.id,
+      req.auth.type,
+      data,
+    );
 
     res.status(200).json({
-      message:"order cancelled successfully",
-      data:order
-    })
+      message: "order cancelled successfully",
+      data: order,
+    });
   } catch (error) {
-     console.error("CANCEL ORDER ERROR:", error);
+    console.error("CANCEL ORDER ERROR:", error);
 
     if (error instanceof Error) {
       if (error.message === "Order not found") {
@@ -260,21 +261,14 @@ export async function cancelOrderController(req:Request,res:Response):Promise<vo
         return;
       }
 
-      if (
-        error.message ===
-        "Order is already cancelled"
-      ) {
+      if (error.message === "Order is already cancelled") {
         res.status(409).json({
           message: error.message,
         });
         return;
       }
 
-      if (
-        error.message.includes(
-          "only cancel an order"
-        )
-      ) {
+      if (error.message.includes("only cancel an order")) {
         res.status(409).json({
           message: error.message,
         });
@@ -291,5 +285,149 @@ export async function cancelOrderController(req:Request,res:Response):Promise<vo
     res.status(500).json({
       message: "Failed to cancel order",
     });
+  }
+}
+
+export async function getInvoiceController(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+    if (!req.auth) {
+      res.status(401).json({
+        message: "Authentication is required",
+      });
+      return;
+    }
+
+    const orderId = Number(req.params.id);
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      res.status(400).json({
+        message: "Invalid order ID",
+      });
+      return;
+    }
+
+    const order = await getInvoiceService(orderId, req.auth.id, req.auth.type);
+
+    const doc = new PDFDocument({
+      margin: 50,
+    });
+
+    res.setHeader("content-Type", "application/pdf");
+
+    res.setHeader(
+      "content-Disposition",
+      `inline; filename="invoice-${order.id}.pdf`,
+    );
+
+    doc.pipe(res);
+
+    doc.fontSize(22).text("StoreFront", {
+      align: "center",
+    });
+
+    doc.moveDown();
+
+    doc.fontSize(11);
+
+    doc.text(`Invoice #: INV-${String(order.id).padStart(6, "0")}`);
+    doc.text(`Order #: ${order.id}`);
+    doc.text(`Date: ${order.createdAt.toLocaleDateString()}`);
+
+    doc.moveDown();
+
+    doc.fontSize(14).text("Customer");
+
+    doc
+      .fontSize(11)
+      .text(`Name: ${order.user.name}`)
+      .text(`Email: ${order.user.email}`);
+
+    doc.moveDown();
+
+    doc.fontSize(14).text(`Shipping Address`);
+
+    doc.fontSize(11).text(order.shippingAddress);
+
+    doc.moveDown();
+
+    doc.fontSize(14).text("Payment");
+
+    doc
+      .fontSize(11)
+      .text(`Method: ${order.paymentMethod}`)
+      .text(`Status: ${order.status}`);
+
+    doc.moveDown();
+
+    doc.fontSize(14).text(`Items`)
+
+    doc.moveDown()
+
+    let calculatedTotal = 0;
+
+    for(const item of order.items) {
+      const price = Number(item.price)
+      const itemTotal = price * item.qty
+
+      calculatedTotal += itemTotal
+
+      doc
+      .fontSize(11)
+      .text(
+          `${item.product.name} | Qty: ${item.qty} | ` +
+          `₹${price.toFixed(2)} | ` +
+          `₹${itemTotal.toFixed(2)}`
+        );
+
+          doc.moveDown(0.5);
+    }
+
+     doc.moveDown();
+
+    doc
+      .fontSize(16)
+      .text(
+        `Total: ₹${calculatedTotal.toFixed(2)}`,
+        {
+          align: "right",
+        }
+      );
+
+    doc.moveDown();
+
+    doc
+      .fontSize(10)
+      .text(
+        "Thank you for shopping with us!",
+        {
+          align: "center",
+        }
+      );
+
+    doc.end();
+  } catch (error) {
+     console.error(
+      "GET INVOICE ERROR:",
+      error
+    );
+
+    if (
+      error instanceof Error &&
+      error.message === "Order not found"
+    ) {
+      res.status(404).json({
+        message: "Order not found",
+      });
+      return;
+    }
+
+    if (!res.headersSent) {
+      res.status(500).json({
+        message: "Failed to generate invoice",
+      });
+    }
   }
 }
