@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OrderStatusBadge } from "./OrderStatusBadge";
 
 import type { Order } from "@/zod/order.schema";
 
@@ -92,7 +93,7 @@ export function OrderTable({
 
                
                 <TableCell>
-                  {order.status}
+                   <OrderStatusBadge status={order.status} />
                 </TableCell>
 
              
