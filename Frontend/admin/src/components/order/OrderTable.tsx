@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { OrderStatusBadge } from "./OrderStatusBadge";
+import { OrderActions } from "./OrderActions";
 
 import type { Order } from "@/zod/order.schema";
 
@@ -36,7 +37,7 @@ export function OrderTable({
 
             <TableHead>Date</TableHead>
 
-            <TableHead className="text-right">
+            <TableHead>
               Actions
             </TableHead>
           </TableRow>
@@ -83,7 +84,7 @@ export function OrderTable({
                 </TableCell>
 
                 <TableCell>
-                  ₹{Number(order.total).toFixed(2)}
+                  ${Number(order.total).toFixed(2)}
                 </TableCell>
 
                
@@ -104,9 +105,9 @@ export function OrderTable({
                 </TableCell>
 
                
-                <TableCell className="text-right">
-                  —
-                </TableCell>
+               <TableCell>
+  <OrderActions order={order} />
+</TableCell>
               </TableRow>
             ))
           )}

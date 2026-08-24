@@ -1,7 +1,9 @@
 import { api } from "@/api/axios";
 
 import {
+    orderResponseSchema,
   ordersResponseSchema,
+  type Order,
   type OrdersResponse,
 } from "@/zod/order.schema";
 
@@ -26,4 +28,30 @@ export async function getOrders(
   return ordersResponseSchema.parse(
     response
   );
+}
+
+export async function getOrderById(
+  id: number
+): Promise<Order> {
+  const response = await api.get<unknown>(
+    `/orders/${id}`
+  );
+
+  const parsed = orderResponseSchema.parse(response);
+
+  return parsed.data;
+}
+
+export async function updateOrderStatus(
+  id: number,
+  status: string
+): Promise<Order> {
+  const response = await api.patch<unknown>(
+    `/orders/${id}/status`,
+    { status }
+  );
+
+  const parsed = orderResponseSchema.parse(response);
+
+  return parsed.data;
 }

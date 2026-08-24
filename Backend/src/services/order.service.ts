@@ -161,13 +161,17 @@ export async function getOrdersService(
     }),
   ]);
 
+   const totalPages = Math.ceil(total / limit);
+
   return {
     orders,
     pagination: {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages,
+       hasPreviousPage: page > 1,
+    hasNextPage: page < totalPages,
     },
   };
 }
@@ -260,11 +264,32 @@ export async function updateOrderStatusService(
         data: {
           status: data.status,
         },
+        include: {
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  images: true,
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
       });
 
       await tx.orderStatusHistory.create({
         data: {
-          orderId: orderId,
+          orderId,
           status: data.status,
         },
       });

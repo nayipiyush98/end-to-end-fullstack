@@ -68,6 +68,8 @@ export const orderPaginationSchema = z.object({
   limit: z.number(),
   total: z.number(),
   totalPages: z.number(),
+  hasPreviousPage: z.boolean(),
+  hasNextPage: z.boolean(),
 });
 
 
@@ -97,10 +99,20 @@ export type Order = z.infer<
   typeof orderSchema
 >;
 
-export type OrderPagination = z.infer<
-  typeof orderPaginationSchema
->;
+
 
 export type OrdersResponse = z.infer<
   typeof ordersResponseSchema
 >;
+
+
+
+
+export type OrderPagination = z.infer<
+  typeof orderPaginationSchema
+>;
+
+export const orderResponseSchema = z.object({
+  message: z.string(),
+  data: orderSchema,
+});

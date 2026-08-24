@@ -10,13 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 
 export function Orders() {
@@ -75,6 +70,43 @@ const setStatus = useOrderStore(
       </div>
     );
   }
+
+  const getPageNumbers = () => {
+  const pages: (number | "...")[] = [];
+
+  if (totalPages <= 5) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  if (page <= 3) {
+    return [1, 2, 3, 4, "...", totalPages];
+  }
+
+  if (page >= totalPages - 2) {
+    return [
+      1,
+      "...",
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+
+  return [
+    1,
+    "...",
+    page - 1,
+    page,
+    page + 1,
+    "...",
+    totalPages,
+  ];
+};
     return (
          <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -90,11 +122,13 @@ const setStatus = useOrderStore(
 
   <Select
     value={status || "ALL"}
-    onValueChange={(value) => {
-      setStatus(
-        value === "ALL" ? "" : value
-      );
-    }}
+   onValueChange={(value) => {
+  setStatus(
+    value === null || value === "ALL"
+      ? ""
+      : value
+  );
+}}
   >
     <SelectTrigger className="w-45">
       <SelectValue placeholder="Filter status" />
@@ -126,68 +160,81 @@ const setStatus = useOrderStore(
       
 
       <OrderTable orders={orders} />
-      {totalPages > 1 && (
-  <Pagination>
-    <PaginationContent>
-      <PaginationItem>
-        <PaginationPrevious
-          href="#"
-          onClick={(event) => {
-            event.preventDefault();
+  <div className="flex mt-4">
+  <p className="text-sm font-medium pt-2 pr-10">
+    Page {page} of {totalPages}
+  </p>
 
-            if (page > 1) {
-              setPage(page - 1);
-            }
-          }}
-          className={
-            page === 1
-              ? "pointer-events-none opacity-50"
-              : ""
-          }
-        />
-      </PaginationItem>
+  <div className="flex items-center gap-2">
+    {/* First */}
+    <Button
+      variant="outline"
+      size="icon"
+      disabled={page === 1 || isLoading}
+      onClick={() => setPage(1)}
+    >
+      <ChevronsLeft className="h-4 w-4" />
+    </Button>
 
-      {Array.from(
-        { length: totalPages },
-        (_, index) => index + 1
-      ).map((pageNumber) => (
-        <PaginationItem key={pageNumber}>
-          <button
-            type="button"
-            onClick={() =>
-              setPage(pageNumber)
-            }
-            className={`px-3 py-2 text-sm ${
-              page === pageNumber
-                ? "font-semibold"
-                : ""
-            }`}
+    {/* Previous */}
+    <Button
+      variant="outline"
+      size="icon"
+      disabled={page === 1 || isLoading}
+      onClick={() => setPage(page - 1)}
+    >
+      <ChevronLeft className="h-4 w-4" />
+    </Button>
+
+    {/* Page numbers */}
+    {getPageNumbers().map((pageNumber, index) => {
+      if (pageNumber === "...") {
+        return (
+          <span
+            key={`ellipsis-${index}`}
+            className="px-2 text-muted-foreground"
           >
-            {pageNumber}
-          </button>
-        </PaginationItem>
-      ))}
+            ...
+          </span>
+        );
+      }
 
-      <PaginationItem>
-        <PaginationNext
-          href="#"
-          onClick={(event) => {
-            event.preventDefault();
+      const isCurrent = pageNumber === page;
 
-            if (page < totalPages) {
-              setPage(page + 1);
-            }
-          }}
-          className={
-            page === totalPages
-              ? "pointer-events-none opacity-50"
-              : ""
-          }
-        />
-      </PaginationItem>
-    </PaginationContent>
-  </Pagination>
-)}
+      return (
+        <Button
+          key={pageNumber}
+          variant={isCurrent ? "default" : "outline"}
+          size="icon"
+          disabled={isLoading}
+          onClick={() => setPage(pageNumber as number)}
+        >
+          {pageNumber}
+        </Button>
+      );
+    })}
+
+    {/* Next */}
+    <Button
+      variant="outline"
+      size="icon"
+      disabled={page === totalPages || isLoading}
+      onClick={() => setPage(page + 1)}
+    >
+      <ChevronRight className="h-4 w-4" />
+    </Button>
+
+    {/* Last */}
+    <Button
+      variant="outline"
+      size="icon"
+      disabled={page === totalPages || isLoading}
+      onClick={() => setPage(totalPages)}
+    >
+      <ChevronsRight className="h-4 w-4" />
+    </Button>
+  </div>
+</div>
     </div>
     
     )

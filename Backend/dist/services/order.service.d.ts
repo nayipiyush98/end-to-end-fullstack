@@ -77,6 +77,8 @@ export declare function getOrdersService(authId: number, AuthType: "CUSTOMER" | 
         limit: number;
         total: number;
         totalPages: number;
+        hasPreviousPage: boolean;
+        hasNextPage: boolean;
     };
 }>;
 export declare function getOrderByIdService(orderId: number, authId: number, authType: "ADMIN" | "CUSTOMER"): Promise<{
@@ -119,6 +121,26 @@ export declare function getOrderByIdService(orderId: number, authId: number, aut
     updatedAt: Date;
 }>;
 export declare function updateOrderStatusService(orderId: number, data: UpdateOrderStatusInput): Promise<{
+    items: ({
+        product: {
+            id: number;
+            images: string[];
+            name: string;
+            price: import("@prisma/client-runtime-utils").Decimal;
+        };
+    } & {
+        id: number;
+        orderId: number;
+        productId: number;
+        qty: number;
+        price: import("@prisma/client-runtime-utils").Decimal;
+    })[];
+    user: {
+        email: string;
+        id: number;
+        name: string;
+    };
+} & {
     id: number;
     userId: number;
     total: import("@prisma/client-runtime-utils").Decimal;

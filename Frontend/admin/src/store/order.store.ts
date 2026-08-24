@@ -1,7 +1,9 @@
 import { create } from "zustand";
 
 import {
+    getOrderById,
   getOrders,
+  updateOrderStatus,
 } from "@/api/order.api";
 
 import type {
@@ -33,6 +35,15 @@ interface OrderState {
   setLimit: (limit: number) => void;
 
   clearError: () => void;
+
+  order: Order | null;
+
+fetchOrderById: (id: number) => Promise<void>;
+
+updateOrderStatus: (
+  id: number,
+  status: string
+) => Promise<void>;
 }
 
 export const useOrderStore = create<OrderState>(
@@ -100,6 +111,74 @@ export const useOrderStore = create<OrderState>(
         });
       }
     },
+
+    updateOrderStatus: async (id, status) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    const updatedOrder = await updateOrderStatus(
+      id,
+      status
+    );
+
+    set({
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error(
+      "UPDATE ORDER STATUS ERROR:",
+      error
+    );
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to update order status",
+    });
+
+    throw error;
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
+
+    fetchOrderById: async (id) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+      order: null,
+    });
+
+    const order = await getOrderById(id);
+
+    set({
+      order,
+    });
+  } catch (error) {
+    console.error(
+      "FETCH ORDER ERROR:",
+      error
+    );
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch order",
+    });
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
 
 
 
