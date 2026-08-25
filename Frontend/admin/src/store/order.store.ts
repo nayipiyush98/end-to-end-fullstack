@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import {
+    cancelOrder,
     getOrderById,
   getOrders,
   updateOrderStatus,
@@ -43,6 +44,11 @@ fetchOrderById: (id: number) => Promise<void>;
 updateOrderStatus: (
   id: number,
   status: string
+) => Promise<void>;
+
+cancelOrder: (
+  id: number,
+  reason: string
 ) => Promise<void>;
 }
 
@@ -123,7 +129,7 @@ export const useOrderStore = create<OrderState>(
       id,
       status
     );
-
+    await get().fetchOrders();
     set({
       order: updatedOrder,
     });
@@ -138,6 +144,37 @@ export const useOrderStore = create<OrderState>(
         error instanceof Error
           ? error.message
           : "Failed to update order status",
+    });
+
+    throw error;
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
+
+cancelOrder: async (id, reason) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    await cancelOrder(id, reason);
+
+    await get().fetchOrders();
+  } catch (error) {
+    console.error(
+      "CANCEL ORDER ERROR:",
+      error
+    );
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to cancel order",
     });
 
     throw error;

@@ -55,3 +55,26 @@ export async function updateOrderStatus(
 
   return parsed.data;
 }
+
+export async function cancelOrder(
+  id: number,
+  reason: string
+): Promise<void> {
+  await api.post<unknown>(
+    `/orders/${id}/cancel`,
+    { reason }
+  );
+}
+
+export async function downloadInvoice(
+  id: number
+): Promise<Blob> {
+  const response = await api.get<Blob>(
+    `/orders/${id}/invoice`,
+    {
+      responseType: "blob",
+    }
+  );
+
+  return response;
+}

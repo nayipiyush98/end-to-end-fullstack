@@ -10,6 +10,7 @@ import { OrderStatusBadge } from "./OrderStatusBadge";
 import { OrderActions } from "./OrderActions";
 
 import type { Order } from "@/zod/order.schema";
+import { Navigate, useNavigate } from "react-router-dom";
 
 interface OrderTableProps {
   orders: Order[];
@@ -18,6 +19,7 @@ interface OrderTableProps {
 export function OrderTable({
   orders,
 }: OrderTableProps) {
+    const navigate = useNavigate();
   return (
     <div className="rounded-md border">
       <Table>
@@ -106,7 +108,12 @@ export function OrderTable({
 
                
                <TableCell>
-  <OrderActions order={order} />
+  <OrderActions
+  order={order}
+  onView={(order) => {
+    navigate(`/admin/orders/${order.id}`);
+  }}
+/>
 </TableCell>
               </TableRow>
             ))

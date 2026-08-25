@@ -23,6 +23,8 @@ export function Orders() {
   (state) => state.page
 );
 
+const limit = useOrderStore((state) => state.limit);
+
 const totalPages = useOrderStore(
   (state) => state.pagination.totalPages
 );
@@ -53,7 +55,7 @@ const setStatus = useOrderStore(
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, [page, limit, status,fetchOrders]);
 
   if (isLoading) {
     return (
