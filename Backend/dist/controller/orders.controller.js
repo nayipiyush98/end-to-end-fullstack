@@ -1,6 +1,6 @@
 import PDFDocument from "pdfkit";
-import { cancelOrderService, createOrderService, getOrderByIdService, getOrdersService, updateOrderStatusService, getInvoiceService, } from "../services/order.service.js";
-import { cancelOrderSchema, createOrderSchema, getOrdersQuerySchema, updateOrderStatusSchema, } from "../zod/orderZod.js";
+import { cancelOrderService, createOrderService, getOrderByIdService, getOrdersService, updateOrderStatusService, getInvoiceService, createAdminOrderService, } from "../services/order.service.js";
+import { cancelOrderSchema, createAdminOrderSchema, createOrderSchema, getOrdersQuerySchema, updateOrderStatusSchema, } from "../zod/orderZod.js";
 export async function createOrderController(req, res) {
     try {
         if (!req.user) {
@@ -293,6 +293,40 @@ export async function getInvoiceController(req, res) {
                 message: "Failed to generate invoice",
             });
         }
+    }
+}
+export async function createAdminOrderController(req, res) {
+    try {
+        if (!req.auth) {
+            res.status(401).json({
+                message: "Authentication required",
+            });
+            return;
+        }
+        if (req.auth.type !== "ADMIN") {
+            res.status(403).json({
+                message: "Admin access required",
+            });
+            return;
+        }
+        const data = createAdminOrderSchema.parse(req.body);
+        const order = await createAdminOrderService(data);
+        res.status(201).json({
+            message: "Order created successfully",
+            data: order,
+        });
+    }
+    catch (error) {
+        console.error("CREATE ADMIN ORDER ERROR:", error);
+        if (error instanceof Error) {
+            res.status(400).json({
+                message: error.message,
+            });
+            return;
+        }
+        res.status(500).json({
+            message: "Failed to create order",
+        });
     }
 }
 //# sourceMappingURL=orders.controller.js.map

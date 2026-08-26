@@ -7,6 +7,7 @@ import cors from "cors";
 import path from "path";
 import categoriesRoutes from "./routes/categories.routes.js";
 import ordersRoutes from "./routes/orders.routes.js";
+import usersRoutes from "./routes/users.routes.js";
 
 const app = Express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +36,7 @@ async function startServer() {
   app.use(`/api/${API_VERSION}`,productRoutes);
   app.use(`/api/${API_VERSION}`,categoriesRoutes);
   app.use(`/api/${API_VERSION}`,ordersRoutes)
+  app.use(`/api/${API_VERSION}`,usersRoutes)
 
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);

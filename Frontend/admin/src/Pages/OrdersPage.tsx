@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 
 import { OrderTable } from "@/components/order/OrderTable";
+import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { useOrderStore } from "@/store/order.store";
 import {
@@ -15,6 +17,7 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 
 
 export function Orders() {
+    const navigate = useNavigate();
     const orders = useOrderStore(
     (state) => state.orders
   );
@@ -158,6 +161,12 @@ const setStatus = useOrderStore(
       </SelectItem>
     </SelectContent>
   </Select>
+  <Button
+      onClick={() => navigate("/orders/create")}
+    >
+      <Plus className="mr-2 h-4 w-4" />
+      Create Order
+    </Button>
 </div>
       
 

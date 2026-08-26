@@ -5,4 +5,5 @@ export declare function getOrderByIdController(req: Request, res: Response): Pro
 export declare function updateOrderStatusController(req: Request, res: Response): Promise<void>;
 export declare function cancelOrderController(req: Request, res: Response): Promise<void>;
 export declare function getInvoiceController(req: Request, res: Response): Promise<void>;
+export declare function createAdminOrderController(req: Request, res: Response): Promise<void>;
 //# sourceMappingURL=orders.controller.d.ts.map

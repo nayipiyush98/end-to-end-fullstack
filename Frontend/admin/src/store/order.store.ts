@@ -2,9 +2,11 @@ import { create } from "zustand";
 
 import {
     cancelOrder,
+    createAdminOrder,
     getOrderById,
   getOrders,
   updateOrderStatus,
+  type CreateAdminOrderInput,
 } from "@/api/order.api";
 
 import type {
@@ -50,6 +52,10 @@ cancelOrder: (
   id: number,
   reason: string
 ) => Promise<void>;
+
+createAdminOrder: (
+  data: CreateAdminOrderInput
+) => Promise<Order>;
 }
 
 export const useOrderStore = create<OrderState>(
@@ -175,6 +181,42 @@ cancelOrder: async (id, reason) => {
         error instanceof Error
           ? error.message
           : "Failed to cancel order",
+    });
+
+    throw error;
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
+
+createAdminOrder: async (data) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    const order =
+      await createAdminOrder(data);
+
+    set((state) => ({
+      orders: [
+        order,
+        ...state.orders,
+      ],
+    }));
+
+    return order;
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to create order";
+
+    set({
+      error: message,
     });
 
     throw error;

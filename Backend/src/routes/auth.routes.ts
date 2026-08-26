@@ -32,6 +32,7 @@ authRoutes.post("/admin/refresh", adminRefreshToken);
  */
 authRoutes.get("/users", rateLimiter, userRegister);
 authRoutes.post("/register", rateLimiter, userRegister);
+
 authRoutes.post("/login", rateLimiter, userLogin);
 authRoutes.post("/refresh-token", userRefreshToken);
 authRoutes.post("/logout", userLogOut);

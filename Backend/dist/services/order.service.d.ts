@@ -1,4 +1,4 @@
-import type { CancelOrderInput, CreateOrderInput, GetOrdersQuery, UpdateOrderStatusInput } from "../zod/orderZod.js";
+import type { CancelOrderInput, CreateAdminOrderInput, CreateOrderInput, GetOrdersQuery, UpdateOrderStatusInput } from "../zod/orderZod.js";
 export declare function createOrderService(userId: number, data: CreateOrderInput): Promise<{
     items: ({
         product: {
@@ -170,6 +170,45 @@ export declare function getInvoiceService(orderId: number, authId: number, authT
             id: number;
             name: string;
             sku: string;
+        };
+    } & {
+        id: number;
+        orderId: number;
+        productId: number;
+        qty: number;
+        price: import("@prisma/client-runtime-utils").Decimal;
+    })[];
+    user: {
+        email: string;
+        id: number;
+        name: string;
+    };
+} & {
+    id: number;
+    userId: number;
+    total: import("@prisma/client-runtime-utils").Decimal;
+    shippingAddress: string;
+    paymentMethod: string;
+    status: string;
+    cancelReason: string | null;
+    cancelledAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}>;
+export declare function createAdminOrderService(data: CreateAdminOrderInput): Promise<{
+    items: ({
+        product: {
+            id: number;
+            name: string;
+            description: string | null;
+            price: import("@prisma/client-runtime-utils").Decimal;
+            stock: number;
+            sku: string;
+            images: string[];
+            categoryId: number;
+            isArchived: boolean;
+            createdAt: Date;
+            updatedAt: Date;
         };
     } & {
         id: number;

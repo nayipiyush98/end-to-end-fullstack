@@ -305,4 +305,94 @@ export async function getInvoiceService(orderId, authId, authType) {
     }
     return order;
 }
+export async function createAdminOrderService(data) {
+    const { userId, items, shippingAddress, paymentMethod, } = data;
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+    });
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const productIds = items.map((item) => item.productId);
+    const products = await prisma.product.findMany({
+        where: {
+            id: {
+                in: productIds,
+            },
+            isArchived: false,
+        },
+    });
+    if (products.length !== productIds.length) {
+        throw new Error("One or more products are unavailable.");
+    }
+    const productMap = new Map(products.map((product) => [
+        product.id,
+        product,
+    ]));
+    let total = 0;
+    const orderItems = items.map((item) => {
+        const product = productMap.get(item.productId);
+        if (!product) {
+            throw new Error(`Product ${item.productId} not found.`);
+        }
+        if (product.stock < item.qty) {
+            throw new Error(`Insufficient stock for product "${product.name}".`);
+        }
+        const itemTotal = Number(product.price) * item.qty;
+        total += itemTotal;
+        return {
+            productId: product.id,
+            qty: item.qty,
+            price: product.price,
+        };
+    });
+    const order = await prisma.$transaction(async (tx) => {
+        const createdOrder = await tx.order.create({
+            data: {
+                userId,
+                total,
+                shippingAddress,
+                paymentMethod,
+                items: {
+                    create: orderItems,
+                },
+                statusHistory: {
+                    create: {
+                        status: "PENDING",
+                    },
+                },
+            },
+            include: {
+                items: {
+                    include: {
+                        product: true,
+                    },
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+        for (const item of items) {
+            await tx.product.update({
+                where: {
+                    id: item.productId,
+                },
+                data: {
+                    stock: {
+                        decrement: item.qty,
+                    },
+                },
+            });
+        }
+        return createdOrder;
+    });
+    return order;
+}
 //# sourceMappingURL=order.service.js.map

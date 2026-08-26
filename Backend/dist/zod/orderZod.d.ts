@@ -28,4 +28,14 @@ export declare const cancelOrderSchema: z.ZodObject<{
     reason: z.ZodString;
 }, z.core.$strip>;
 export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;
+export declare const createAdminOrderSchema: z.ZodObject<{
+    userId: z.ZodNumber;
+    items: z.ZodArray<z.ZodObject<{
+        productId: z.ZodNumber;
+        qty: z.ZodNumber;
+    }, z.core.$strip>>;
+    shippingAddress: z.ZodString;
+    paymentMethod: z.ZodString;
+}, z.core.$strip>;
+export type CreateAdminOrderInput = z.infer<typeof createAdminOrderSchema>;
 //# sourceMappingURL=orderZod.d.ts.map

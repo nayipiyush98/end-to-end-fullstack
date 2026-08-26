@@ -21,6 +21,7 @@ import { Notifications } from "@/Pages/NotificationsPage";
 import { Display } from "@/Pages/DisplayPage";
 import { AddEditCategoryPage } from "@/Pages/AddEditCategoryPage";
 import { OrderDetailPage } from "@/Pages/OrderDetilsPage";
+import { CreateOrderPage } from "@/Pages/CreateOrderPage";
 
 
 function AppRouter() {
@@ -65,6 +66,10 @@ function AppRouter() {
           <Route
   path="/admin/orders/:id"
   element={<OrderDetailPage />}
+/>
+<Route
+  path="/orders/create"
+  element={<CreateOrderPage />}
 />
           <Route path={`${ADMIN_URL}/categories`} element={<Categories />} />
           <Route path={`${ADMIN_URL}/chats`} element={<Chats />} />

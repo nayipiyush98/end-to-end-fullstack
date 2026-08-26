@@ -78,3 +78,30 @@ export async function downloadInvoice(
 
   return response;
 }
+
+export interface CreateAdminOrderInput {
+  userId: number;
+
+  items: {
+    productId: number;
+    qty: number;
+  }[];
+
+  shippingAddress: string;
+
+  paymentMethod: string;
+}
+
+export async function createAdminOrder(
+  data: CreateAdminOrderInput
+): Promise<Order> {
+  const response = await api.post<unknown>(
+    "/orders/admin",
+    data
+  );
+
+  const parsed =
+    orderResponseSchema.parse(response);
+
+  return parsed.data;
+}
