@@ -1,4 +1,4 @@
-export declare function getUsersService(): Promise<{
+export declare function getUsersService(email?: string): Promise<{
     createdAt: Date;
     email: string;
     id: number;

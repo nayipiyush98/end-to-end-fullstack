@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import {
-  getCustomers,
+  getUsers,
   type Customer,
 } from "@/api/user.api";
 
@@ -12,7 +12,9 @@ interface UserState {
 
   error: string | null;
 
-  fetchUsers: () => Promise<void>;
+  searchUsers: (email: string) => Promise<void>;
+
+  clearUsers: () => void;
 
   clearError: () => void;
 }
@@ -25,35 +27,44 @@ export const useUserStore = create<UserState>(
 
     error: null,
 
-    fetchUsers: async () => {
+    searchUsers: async (email: string) => {
       try {
         set({
           isLoading: true,
           error: null,
         });
 
-        const users = await getCustomers();
+        const response = await getUsers(
+          email
+        );
 
         set({
-          users,
+          users: response.data,
         });
       } catch (error) {
         console.error(
-          "FETCH USERS ERROR:",
+          "SEARCH USERS ERROR:",
           error
         );
 
         set({
+          users: [],
           error:
             error instanceof Error
               ? error.message
-              : "Failed to fetch users",
+              : "Failed to search customers",
         });
       } finally {
         set({
           isLoading: false,
         });
       }
+    },
+
+    clearUsers: () => {
+      set({
+        users: [],
+      });
     },
 
     clearError: () => {

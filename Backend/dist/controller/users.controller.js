@@ -13,7 +13,8 @@ export async function getUsersController(req, res) {
             });
             return;
         }
-        const users = await getUsersService();
+        const email = typeof req.query.email === "string" ? req.query.email.trim() : undefined;
+        const users = await getUsersService(email);
         res.status(200).json({
             message: "Users fetched successfully",
             data: users,

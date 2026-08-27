@@ -384,7 +384,8 @@ export async function getInvoiceService(
             select:{
               id:true,
               name:true,
-              sku:true
+              sku:true,
+              images:true
             }
           }
         }

@@ -168,6 +168,7 @@ export declare function getInvoiceService(orderId: number, authId: number, authT
     items: ({
         product: {
             id: number;
+            images: string[];
             name: string;
             sku: string;
         };

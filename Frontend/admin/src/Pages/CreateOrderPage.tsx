@@ -17,9 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { useUserStore } from "@/store/user.store";
 import { useOrderStore } from "@/store/order.store";
+import type { Customer } from "@/api/user.api";
 
 interface OrderItem {
   productId: number;
@@ -29,20 +37,30 @@ interface OrderItem {
 export function CreateOrderPage() {
   const navigate = useNavigate();
 
+
+const [customerEmail, setCustomerEmail] =
+  useState("");
+
+const [selectedCustomer, setSelectedCustomer] =
+  useState<Customer | null>(null);
+
+const [customerDialogOpen, setCustomerDialogOpen] =
+  useState(false);
+
+const isSearchingUsers = useUserStore(
+  (state) => state.isLoading
+);
+
+const searchUsers = useUserStore(
+  (state) => state.searchUsers
+);
+
+const clearUsers = useUserStore(
+  (state) => state.clearUsers
+);
+
   const users = useUserStore(
     (state) => state.users
-  );
-
-  const fetchUsers = useUserStore(
-    (state) => state.fetchUsers
-  );
-
-  const usersLoading = useUserStore(
-    (state) => state.isLoading
-  );
-
-  const usersError = useUserStore(
-    (state) => state.error
   );
 
   const createAdminOrder = useOrderStore(
@@ -67,9 +85,31 @@ export function CreateOrderPage() {
   const [paymentMethod, setPaymentMethod] =
     useState("COD");
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+ useEffect(() => {
+  if (selectedCustomer) {
+    return;
+  }
+
+  const email = customerEmail.trim();
+
+  if (email.length < 2) {
+    clearUsers();
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    searchUsers(email);
+  }, 500);
+
+  return () => {
+    clearTimeout(timer);
+  };
+}, [
+  customerEmail,
+  selectedCustomer,
+  searchUsers,
+  clearUsers,
+]);
 
   const addItem = () => {
     setItems((current) => [
@@ -165,41 +205,119 @@ export function CreateOrderPage() {
           <CardTitle>Customer</CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <Select
-            value={userId}
-            onValueChange={setUserId}
-            disabled={usersLoading}
-          >
-            <SelectTrigger>
-              <SelectValue
-                placeholder={
-                  usersLoading
-                    ? "Loading customers..."
-                    : "Select customer"
-                }
-              />
-            </SelectTrigger>
+<CardContent>
+  {selectedCustomer ? (
+    <div className="flex items-center justify-between rounded-md border p-3">
+      <div>
+        <p className="text-sm font-medium">
+          {selectedCustomer.email}
+        </p>
+      </div>
 
-            <SelectContent>
-              {users.map((user) => (
-                <SelectItem
-                  key={user.id}
-                  value={String(user.id)}
-                >
-                  {user.name} — {user.email}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {usersError && (
-            <p className="mt-2 text-sm text-red-500">
-              {usersError}
-            </p>
-          )}
-        </CardContent>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          setSelectedCustomer(null);
+          setCustomerEmail("");
+          clearUsers();
+        }}
+      >
+        Change
+      </Button>
+    </div>
+  ) : (
+    <Button
+      type="button"
+      variant="outline"
+      onClick={() => {
+        clearUsers();
+        setCustomerEmail("");
+        setCustomerDialogOpen(true);
+      }}
+      className="w-full justify-start"
+    >
+      Select Customer
+    </Button>
+  )}
+</CardContent>
       </Card>
+      <Dialog
+  open={customerDialogOpen}
+  onOpenChange={(open) => {
+    setCustomerDialogOpen(open);
+
+    if (!open) {
+      clearUsers();
+      setCustomerEmail("");
+    }
+  }}
+>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Select Customer</DialogTitle>
+
+      <DialogDescription>
+        Search for a customer by email and select them.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-4">
+      <Input
+        value={customerEmail}
+        onChange={(event) => {
+          setCustomerEmail(event.target.value);
+        }}
+        placeholder="Search customer by email..."
+        autoFocus
+      />
+
+      {isSearchingUsers && (
+        <p className="text-sm text-muted-foreground">
+          Searching customers...
+        </p>
+      )}
+
+      {!isSearchingUsers &&
+        customerEmail.trim().length >= 2 &&
+        users.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            No customers found.
+          </p>
+        )}
+
+      {users.length > 0 && (
+        <div className="max-h-64 overflow-y-auto rounded-md border">
+          {users.map((user) => (
+            <button
+              key={user.id}
+              type="button"
+              className="flex w-full items-center justify-between border-b px-3 py-3 text-left last:border-b-0 hover:bg-muted"
+              onClick={() => {
+                setSelectedCustomer(user);
+                setCustomerEmail(user.email);
+                setUserId(String(user.id));
+
+                clearUsers();
+                setCustomerDialogOpen(false);
+              }}
+            >
+              <div>
+                <p className="text-sm font-medium">
+                  {user.email}
+                </p>
+
+                <p className="text-xs text-muted-foreground">
+                  Customer ID: {user.id}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  </DialogContent>
+</Dialog>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

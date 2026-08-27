@@ -1,4 +1,3 @@
-import PDFDocument from "pdfkit";
 import {
   cancelOrderService,
   createOrderService,
@@ -8,6 +7,7 @@ import {
   getInvoiceService,
   createAdminOrderService,
 } from "../services/order.service.js";
+import { createInvoice } from "../services/pdf.service.js";
 import {
   cancelOrderSchema,
   createAdminOrderSchema,
@@ -313,103 +313,7 @@ export async function getInvoiceController(
 
     const order = await getInvoiceService(orderId, req.auth.id, req.auth.type);
 
-    const doc = new PDFDocument({
-      margin: 50,
-    });
-
-    res.setHeader("content-Type", "application/pdf");
-
-    res.setHeader(
-      "content-Disposition",
-      `inline; filename="invoice-${order.id}.pdf`,
-    );
-
-    doc.pipe(res);
-
-    doc.fontSize(22).text("StoreFront", {
-      align: "center",
-    });
-
-    doc.moveDown();
-
-    doc.fontSize(11);
-
-    doc.text(`Invoice #: INV-${String(order.id).padStart(6, "0")}`);
-    doc.text(`Order #: ${order.id}`);
-    doc.text(`Date: ${order.createdAt.toLocaleDateString()}`);
-
-    doc.moveDown();
-
-    doc.fontSize(14).text("Customer");
-
-    doc
-      .fontSize(11)
-      .text(`Name: ${order.user.name}`)
-      .text(`Email: ${order.user.email}`);
-
-    doc.moveDown();
-
-    doc.fontSize(14).text(`Shipping Address`);
-
-    doc.fontSize(11).text(order.shippingAddress);
-
-    doc.moveDown();
-
-    doc.fontSize(14).text("Payment");
-
-    doc
-      .fontSize(11)
-      .text(`Method: ${order.paymentMethod}`)
-      .text(`Status: ${order.status}`);
-
-    doc.moveDown();
-
-    doc.fontSize(14).text(`Items`)
-
-    doc.moveDown()
-
-    let calculatedTotal = 0;
-
-    for(const item of order.items) {
-      const price = Number(item.price)
-      const itemTotal = price * item.qty
-
-      calculatedTotal += itemTotal
-
-      doc
-      .fontSize(11)
-      .text(
-          `${item.product.name} | Qty: ${item.qty} | ` +
-          `₹${price.toFixed(2)} | ` +
-          `₹${itemTotal.toFixed(2)}`
-        );
-
-          doc.moveDown(0.5);
-    }
-
-     doc.moveDown();
-
-    doc
-      .fontSize(16)
-      .text(
-        `Total: ₹${calculatedTotal.toFixed(2)}`,
-        {
-          align: "right",
-        }
-      );
-
-    doc.moveDown();
-
-    doc
-      .fontSize(10)
-      .text(
-        "Thank you for shopping with us!",
-        {
-          align: "center",
-        }
-      );
-
-    doc.end();
+    createInvoice(order, res);
   } catch (error) {
      console.error(
       "GET INVOICE ERROR:",

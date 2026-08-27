@@ -293,7 +293,8 @@ export async function getInvoiceService(orderId, authId, authType) {
                         select: {
                             id: true,
                             name: true,
-                            sku: true
+                            sku: true,
+                            images: true
                         }
                     }
                 }

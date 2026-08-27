@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import  logo  from "../../image/logo.png"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -24,7 +25,8 @@ export function AppTitle() {
                 onClick={() => setOpenMobile(false)}
                 className="grid flex-1 text-start text-sm leading-tight"
               >
-                <span className="truncate font-bold">ECommerce - Admin</span>
+                
+                <span className="truncate font-bold flex"><img src={logo} className="h-10 w-10"/><span className="pt-3 pl-2">ECommerce - Admin</span></span>
               </Link>
               <ToggleSidebar />
             </div>
