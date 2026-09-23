@@ -64,11 +64,11 @@ function AppRouter() {
           />
           <Route path={`${ADMIN_URL}/orders`} element={<Orders />} />
           <Route
-  path="/admin/orders/:id"
+   path={`${ADMIN_URL}/orders/:id`}
   element={<OrderDetailPage />}
 />
 <Route
-  path="/orders/create"
+   path={`${ADMIN_URL}/orders/create`}
   element={<CreateOrderPage />}
 />
           <Route path={`${ADMIN_URL}/categories`} element={<Categories />} />

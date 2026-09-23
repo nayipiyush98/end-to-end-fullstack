@@ -40,6 +40,18 @@ export async function getProductById(
   return productSchema.parse(response.data);
 }
 
+export async function searchProducts(
+  search: string
+): Promise<Product[]> {
+  const response = await getProducts({
+    search,
+    limit: 10,
+    isArchived: false,
+  });
+
+  return response.data.products;
+}
+
 export const updateProductsCategory = async (
   ids: number[],
   categoryId: number

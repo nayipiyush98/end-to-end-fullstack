@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import {
   getProducts,
+  searchProducts,
   deleteProduct as deleteProductApi,
   deleteProducts as deleteProductsApi,
    updateProductStock,
@@ -28,6 +29,7 @@ interface ProductState {
       isArchived?: boolean;
   }) => Promise<void>;
 
+  clearProducts: () => void;
   updateCategory: (
   ids: number[],
   categoryId: number
@@ -41,6 +43,14 @@ interface ProductState {
   ids: number[],
   stock: number
 ) => Promise<void>;
+
+searchProducts: (
+  search: string
+) => Promise<void>;
+
+clearSearchProducts: () => void;
+
+searchResults: Product[];
 }
 
 
@@ -50,6 +60,50 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
   isLoading: false,
   error: null,
+  searchResults: [],
+
+  searchProducts: async (search) => {
+  try {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    const response = await getProducts({
+      search,
+      page: 1,
+      limit: 10,
+      isArchived: false,
+    });
+
+    set({
+      products: response.data.products,
+    });
+  } catch (error) {
+    console.error(
+      "SEARCH PRODUCTS ERROR:",
+      error
+    );
+
+    set({
+      products: [],
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to search products",
+    });
+  } finally {
+    set({
+      isLoading: false,
+    });
+  }
+},
+
+clearProducts: () => {
+  set({
+    products: [],
+  });
+},
 
   fetchProducts: async (params) => {
     try {
@@ -81,6 +135,12 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
 
+
+clearSearchProducts: () => {
+  set({
+    searchResults: [],
+  });
+},
 
   deleteProduct: async (id) => {
     try {

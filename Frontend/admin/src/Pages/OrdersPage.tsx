@@ -162,7 +162,7 @@ const setStatus = useOrderStore(
     </SelectContent>
   </Select>
   <Button
-      onClick={() => navigate("/orders/create")}
+      onClick={() => navigate("/admin/orders/create")}
     >
       <Plus className="mr-2 h-4 w-4" />
       Create Order

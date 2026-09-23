@@ -7,6 +7,7 @@ export const API_VERSION = "v1";
 
 // Complete API URL
 export const API_BASE_URL = `${API_HOST}/api/${API_VERSION}`;
+export const SERVER_URL = "http://localhost:3000";
 
 // Authentication
 export const API_TOKEN_COOKIE_KEY = "authorization";
