@@ -4,6 +4,8 @@ export declare function createUser(data: Prisma.UserCreateInput): Promise<{
     name: string;
     email: string;
     password: string;
+    phone: string | null;
+    isActive: boolean;
     createdAt: Date;
 }>;
 export declare function updateUser(id: number, data: Prisma.UserUpdateInput): Promise<{
@@ -11,6 +13,8 @@ export declare function updateUser(id: number, data: Prisma.UserUpdateInput): Pr
     name: string;
     email: string;
     password: string;
+    phone: string | null;
+    isActive: boolean;
     createdAt: Date;
 }>;
 export declare function findByEmailUser(email: string): Promise<{
@@ -18,6 +22,8 @@ export declare function findByEmailUser(email: string): Promise<{
     name: string;
     email: string;
     password: string;
+    phone: string | null;
+    isActive: boolean;
     createdAt: Date;
 } | null>;
 export declare function findByIdUser(args: Prisma.UserFindUniqueArgs): Promise<{
@@ -25,6 +31,8 @@ export declare function findByIdUser(args: Prisma.UserFindUniqueArgs): Promise<{
     name: string;
     email: string;
     password: string;
+    phone: string | null;
+    isActive: boolean;
     createdAt: Date;
 } | null>;
 export declare function deleteUser(id: number): Promise<{
@@ -32,6 +40,8 @@ export declare function deleteUser(id: number): Promise<{
     name: string;
     email: string;
     password: string;
+    phone: string | null;
+    isActive: boolean;
     createdAt: Date;
 }>;
 //# sourceMappingURL=user.model.d.ts.map

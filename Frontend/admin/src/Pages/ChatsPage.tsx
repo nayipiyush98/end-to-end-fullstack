@@ -184,7 +184,7 @@ export function Chats() {
 
         </div>
 
-        {/* Search */}
+      
         <div className="px-4 pb-4">
           <div className="relative">
 
@@ -202,7 +202,7 @@ export function Chats() {
           </div>
         </div>
 
-        {/* Chat List */}
+
         <div className="flex-1 overflow-y-auto px-2">
 
           {filteredChats.map((chat) => (
@@ -243,7 +243,6 @@ export function Chats() {
         </div>
       </aside>
 
-      {/* ================= CHAT AREA ================= */}
 
       <main className="flex min-w-0 flex-1 flex-col">
 
@@ -353,7 +352,7 @@ export function Chats() {
 
         </div>
 
-        {/* Message Composer */}
+       
         <div className="border-t border-slate-800 p-5">
 
           <div className="flex items-center gap-2 rounded-xl border border-slate-700 px-3 py-2">

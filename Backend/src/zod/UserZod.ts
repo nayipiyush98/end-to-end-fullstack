@@ -26,3 +26,24 @@ export const UserLoginValidation = z.object({
 export const UserResetPassword = z.object({
     password:z.string()
 })
+
+export const updateUserProfileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 characters")
+    .optional(),
+
+  addresses: z
+    .array(
+      z.object({
+        address: z.string().min(5, "Address must be at least 5 characters"),
+      })
+    )
+    .optional(),
+});
+
+export type UpdateUserProfileInput = z.infer<
+  typeof updateUserProfileSchema
+>;

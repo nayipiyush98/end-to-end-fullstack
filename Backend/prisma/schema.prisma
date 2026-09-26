@@ -12,9 +12,23 @@ model User {
   name      String
   email     String   @unique
   password  String
+  phone     String?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
   orders    Order[]
+  addresses UserAddress[]
+}
+
+model UserAddress {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  address   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AdminUser {

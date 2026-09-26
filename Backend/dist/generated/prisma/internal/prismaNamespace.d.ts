@@ -245,6 +245,7 @@ export type FieldRef<Model, FieldType> = runtime.FieldRef<Model, FieldType>;
 type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRef<Model, FieldType>;
 export declare const ModelName: {
     readonly User: 'User';
+    readonly UserAddress: 'UserAddress';
     readonly AdminUser: 'AdminUser';
     readonly Role: 'Role';
     readonly Permission: 'Permission';
@@ -266,7 +267,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "adminUser" | "role" | "permission" | "rolePermission" | "product" | "category" | "order" | "orderItem" | "orderStatusHistory";
+        modelProps: "user" | "userAddress" | "adminUser" | "role" | "permission" | "rolePermission" | "product" | "category" | "order" | "orderItem" | "orderStatusHistory";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -341,6 +342,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 count: {
                     args: Prisma.UserCountArgs<ExtArgs>;
                     result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number;
+                };
+            };
+        };
+        UserAddress: {
+            payload: Prisma.$UserAddressPayload<ExtArgs>;
+            fields: Prisma.UserAddressFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.UserAddressFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.UserAddressFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>;
+                };
+                findFirst: {
+                    args: Prisma.UserAddressFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.UserAddressFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>;
+                };
+                findMany: {
+                    args: Prisma.UserAddressFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>[];
+                };
+                create: {
+                    args: Prisma.UserAddressCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>;
+                };
+                createMany: {
+                    args: Prisma.UserAddressCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.UserAddressCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>[];
+                };
+                delete: {
+                    args: Prisma.UserAddressDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>;
+                };
+                update: {
+                    args: Prisma.UserAddressUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.UserAddressDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.UserAddressUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.UserAddressUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>[];
+                };
+                upsert: {
+                    args: Prisma.UserAddressUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAddressPayload>;
+                };
+                aggregate: {
+                    args: Prisma.UserAddressAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateUserAddress>;
+                };
+                groupBy: {
+                    args: Prisma.UserAddressGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.UserAddressGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.UserAddressCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.UserAddressCountAggregateOutputType> | number;
                 };
             };
         };
@@ -1049,9 +1124,18 @@ export declare const UserScalarFieldEnum: {
     readonly name: 'name';
     readonly email: 'email';
     readonly password: 'password';
+    readonly phone: 'phone';
+    readonly isActive: 'isActive';
     readonly createdAt: 'createdAt';
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
+export declare const UserAddressScalarFieldEnum: {
+    readonly id: 'id';
+    readonly userId: 'userId';
+    readonly address: 'address';
+    readonly createdAt: 'createdAt';
+};
+export type UserAddressScalarFieldEnum = (typeof UserAddressScalarFieldEnum)[keyof typeof UserAddressScalarFieldEnum];
 export declare const AdminUserScalarFieldEnum: {
     readonly id: 'id';
     readonly name: 'name';
@@ -1161,6 +1245,10 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  */
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>;
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>;
@@ -1176,10 +1264,6 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>;
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
 /**
  * Reference to a field of type 'Float'
  */
@@ -1336,6 +1420,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter;
 export type GlobalOmitConfig = {
     user?: Prisma.UserOmit;
+    userAddress?: Prisma.UserAddressOmit;
     adminUser?: Prisma.AdminUserOmit;
     role?: Prisma.RoleOmit;
     permission?: Prisma.PermissionOmit;

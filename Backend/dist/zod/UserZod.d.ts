@@ -21,4 +21,12 @@ export declare const UserLoginValidation: z.ZodObject<{
 export declare const UserResetPassword: z.ZodObject<{
     password: z.ZodString;
 }, z.core.$strip>;
+export declare const updateUserProfileSchema: z.ZodObject<{
+    name: z.ZodString;
+    phone: z.ZodOptional<z.ZodString>;
+    addresses: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        address: z.ZodString;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+export type UpdateUserProfileInput = z.infer<typeof updateUserProfileSchema>;
 //# sourceMappingURL=UserZod.d.ts.map

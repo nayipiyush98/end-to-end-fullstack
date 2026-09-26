@@ -129,6 +129,17 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.userAddress`: Exposes CRUD operations for the **UserAddress** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more UserAddresses
+      * const userAddresses = await prisma.userAddress.findMany()
+      * ```
+      */
+    get userAddress(): Prisma.UserAddressDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.adminUser`: Exposes CRUD operations for the **AdminUser** model.
       * Example usage:
       * ```ts
