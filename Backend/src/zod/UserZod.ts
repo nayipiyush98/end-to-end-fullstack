@@ -47,3 +47,13 @@ export const updateUserProfileSchema = z.object({
 export type UpdateUserProfileInput = z.infer<
   typeof updateUserProfileSchema
 >;
+
+export const createUserAddressSchema = z.object({
+  address: z
+    .string()
+    .min(5, "Address must be at least 5 characters"),
+});
+
+export type CreateUserAddressInput = z.infer<
+  typeof createUserAddressSchema
+>;

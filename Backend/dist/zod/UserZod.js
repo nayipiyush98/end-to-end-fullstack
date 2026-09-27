@@ -33,4 +33,9 @@ export const updateUserProfileSchema = z.object({
     }))
         .optional(),
 });
+export const createUserAddressSchema = z.object({
+    address: z
+        .string()
+        .min(5, "Address must be at least 5 characters"),
+});
 //# sourceMappingURL=UserZod.js.map

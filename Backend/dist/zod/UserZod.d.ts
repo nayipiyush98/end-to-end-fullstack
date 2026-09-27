@@ -29,4 +29,8 @@ export declare const updateUserProfileSchema: z.ZodObject<{
     }, z.core.$strip>>>;
 }, z.core.$strip>;
 export type UpdateUserProfileInput = z.infer<typeof updateUserProfileSchema>;
+export declare const createUserAddressSchema: z.ZodObject<{
+    address: z.ZodString;
+}, z.core.$strip>;
+export type CreateUserAddressInput = z.infer<typeof createUserAddressSchema>;
 //# sourceMappingURL=UserZod.d.ts.map

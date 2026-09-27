@@ -30,4 +30,16 @@ export declare function updateUserProfileService(id: number, data: {
     name: string;
     phone: string | null;
 } | null>;
+export declare function createUserAddressService(userId: number, data: {
+    address: string;
+}): Promise<{
+    address: string;
+    createdAt: Date;
+    id: number;
+} | null>;
+export declare function deleteUserAddressService(userId: number, addressId: number): Promise<{
+    address: string;
+    createdAt: Date;
+    id: number;
+} | null>;
 //# sourceMappingURL=users.servies.d.ts.map

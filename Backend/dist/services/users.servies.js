@@ -101,4 +101,48 @@ export async function updateUserProfileService(id, data) {
     });
     return updatedUser;
 }
+export async function createUserAddressService(userId, data) {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+    });
+    if (!user) {
+        return null;
+    }
+    const address = await prisma.userAddress.create({
+        data: {
+            userId,
+            address: data.address,
+        },
+        select: {
+            id: true,
+            address: true,
+            createdAt: true,
+        },
+    });
+    return address;
+}
+export async function deleteUserAddressService(userId, addressId) {
+    const address = await prisma.userAddress.findFirst({
+        where: {
+            id: addressId,
+            userId,
+        },
+    });
+    if (!address) {
+        return null;
+    }
+    const deletedAddress = await prisma.userAddress.delete({
+        where: {
+            id: addressId,
+        },
+        select: {
+            id: true,
+            address: true,
+            createdAt: true,
+        },
+    });
+    return deletedAddress;
+}
 //# sourceMappingURL=users.servies.js.map

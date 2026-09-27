@@ -130,3 +130,63 @@ export async function updateUserProfileService(
 
   return updatedUser;
 }
+
+export async function createUserAddressService(
+  userId: number,
+  data: {
+    address: string;
+  }
+) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const address = await prisma.userAddress.create({
+    data: {
+      userId,
+      address: data.address,
+    },
+    select: {
+      id: true,
+      address: true,
+      createdAt: true,
+    },
+  });
+
+  return address;
+}
+
+export async function deleteUserAddressService(
+  userId: number,
+  addressId: number
+) {
+  const address = await prisma.userAddress.findFirst({
+    where: {
+      id: addressId,
+      userId,
+    },
+  });
+
+  if (!address) {
+    return null;
+  }
+
+  const deletedAddress = await prisma.userAddress.delete({
+    where: {
+      id: addressId,
+    },
+    select: {
+      id: true,
+      address: true,
+      createdAt: true,
+    },
+  });
+
+  return deletedAddress;
+}
